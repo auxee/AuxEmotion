@@ -1,5 +1,8 @@
 # AuxEmotion, a remix of AutoEmotion by FoxShadow10. 
 
+<img src="./AuxEmotion/plugin_icon.png" align="left" style="margin-right:15px">
+
+<br clear="left">
 
 ## Main Points
 
