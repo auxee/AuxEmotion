@@ -1,0 +1,26 @@
+[
+  {
+    "Author": "Auxie",
+    "Name": "AuxEmotion",
+    "Punchline": "Auto-react to emotes with emote, expression, and macro responses.",
+    "Description": "Credit to FoxShadow10 for the original AutoEmotion plugin. This version builds on that base and adds macro-slot responses directly in the Emote Reaction table, alongside emote and expression reactions.",
+    "InternalName": "AuxEmotion",
+    "AssemblyVersion": "0.1.0.0",
+    "ApplicableVersion": "any",
+    "Tags": [
+      "emote",
+      "macro",
+      "automation",
+      "rp"
+    ],
+    "LoadPriority": 90,
+    "IconUrl": "https://raw.githubusercontent.com/Spoooki/AuxEmotion/main/AuxEmotion/images/plugin_icon.png",
+    "RepoUrl": "https://github.com/Spoooki/AuxEmotion",
+    "IsHide": "False",
+    "IsTestingExclusive": "False",
+    "DownloadCount": 1,
+    "LastUpdate": 0,
+    "DownloadLinkInstall": "https://github.com/Spoooki/AuxEmotion/releases/latest/download/AuxEmotion.zip",
+    "DownloadLinkUpdate": "https://github.com/Spoooki/AuxEmotion/releases/latest/download/AuxEmotion.zip"
+  }
+]
