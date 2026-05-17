@@ -35,7 +35,7 @@ You can install AuxEmotion by adding the custom repository:
 2. Go to the *Experimental* tab
 3. Under *Custom Plugin Repositories* section, add the following Dalamud repo:
 
-`https://raw.githubusercontent.com/Spoooki/AuxieDalamudRepo/main/repo.json`
+`https://raw.githubusercontent.com/Spoooki/AuxDalamudRepo/main/repo.json`
 
 4. Save and close
 5. Install the plugin **AuxEmotion** as you would with any other plugin
