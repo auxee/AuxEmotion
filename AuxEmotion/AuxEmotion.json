@@ -8,5 +8,5 @@
     "ApplicableVersion": "any",
     "Tags": [ "emote", "macro", "automation", "rp" ],
     "LoadPriority": 90,
-    "IconUrl": "https://raw.githubusercontent.com/Spoooki/AuxEmotion/main/AuxEmotion/images/plugin_icon.png",
+    "IconUrl": "https://raw.githubusercontent.com/Spoooki/AuxEmotion/main/AuxEmotion/plugin_icon.png",
 }
