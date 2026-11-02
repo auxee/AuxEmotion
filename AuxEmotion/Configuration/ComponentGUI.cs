@@ -627,7 +627,7 @@ namespace AuxEmotion
                 {
                     AuxWidgets.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
                     ImGui.SameLine();
-                    if (AuxWidgets.RoundedSelectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight()), 8f))
+                    if (AuxWidgets.RoundedSelectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value, new Num.Vector2(0f, ImGui.GetTextLineHeight()), 8f, ImGui.GetStyle().FramePadding.Y))
                     {
                         selectedCharacter = player.Value;
                     }
@@ -682,7 +682,8 @@ namespace AuxEmotion
                 {
                     if (!player.Key.Contains(searchCharacterB, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
-                if (AuxWidgets.RoundedSelectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight()), 8f))
+                ImGui.AlignTextToFramePadding();
+                if (AuxWidgets.RoundedSelectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value, new Num.Vector2(0f, ImGui.GetTextLineHeight()), 8f, ImGui.GetStyle().FramePadding.Y))
                 {
                     selectedCharacterB = player.Value;
                 }

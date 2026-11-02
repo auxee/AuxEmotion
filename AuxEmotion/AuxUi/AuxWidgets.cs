@@ -286,13 +286,13 @@ public static class AuxWidgets
         return open;
     }
 
-    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null, float textInset = 0f)
+    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null, float textInset = 0f, float fillPadY = 0f)
     {
         var width = size?.X > 0f ? size.Value.X : ImGui.GetContentRegionAvail().X;
         var height = size?.Y > 0f ? size.Value.Y : ImGui.GetTextLineHeight();
         var inset = textInset * Scale;
         var rowMin = ImGui.GetCursorScreenPos();
-        var rowMax = rowMin + new Vector2(width, height);
+        var rowRight = rowMin.X + width;
         var drawList = ImGui.GetWindowDrawList();
         bool pressed;
 
@@ -308,12 +308,16 @@ public static class AuxWidgets
         }
 
         var hovered = ImGui.IsItemHovered();
+        var spacingUp = MathF.Floor(ImGui.GetStyle().ItemSpacing.Y * 0.5f);
+        var spacingDown = ImGui.GetStyle().ItemSpacing.Y - spacingUp;
+        var bandTop = ImGui.GetItemRectMin().Y + spacingUp - fillPadY;
+        var bandBottom = ImGui.GetItemRectMax().Y - spacingDown + fillPadY;
         drawList.ChannelsSetCurrent(0);
         var windowPosition = ImGui.GetWindowPos();
         var contentMin = windowPosition + ImGui.GetWindowContentRegionMin();
         var contentMax = windowPosition + ImGui.GetWindowContentRegionMax();
-        var fillMin = new Vector2(Math.Max(rowMin.X, contentMin.X), Math.Max(rowMin.Y, contentMin.Y));
-        var fillMax = new Vector2(Math.Min(rowMax.X, contentMax.X), rowMax.Y);
+        var fillMin = new Vector2(Math.Max(rowMin.X, contentMin.X), Math.Max(bandTop, contentMin.Y));
+        var fillMax = new Vector2(Math.Min(rowRight, contentMax.X), bandBottom);
         var rounding = AuxTheme.FrameRounding * Scale;
         if (selected)
         {
