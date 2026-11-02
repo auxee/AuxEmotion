@@ -14,6 +14,7 @@ using AuxEmotion.Utility;
 using Dalamud.Game.ClientState.Conditions;
 using AuxEmotion.ChatMessages;
 using System.Linq;
+using AuxUi;
 
 namespace AuxEmotion;
 
@@ -36,6 +37,7 @@ public partial class AuxEmotionPlugin : IDalamudPlugin
     public AuxEmotionPlugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this);
+        AuxFonts.Initialize(pluginInterface);
 
         LoadConfig();
         InitializeGui();
@@ -182,11 +184,13 @@ public partial class AuxEmotionPlugin : IDalamudPlugin
         Svc.PluginInterface.UiBuilder.Draw -= DrawConfigUI;
         Svc.PluginInterface.UiBuilder.Draw -= DrawStatusWin;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfig;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= OpenConfig;
         Svc.ClientState.Login -= ClientState_Login;
         Svc.ClientState.Logout -= ClientState_Logout;
         EmoteReaderHooks.OnEmote -= OnEmote;
         EmoteReaderHooks.Dispose();
         RemoveHandler();
+        AuxFonts.Dispose();
         ECommonsMain.Dispose();
     }
 

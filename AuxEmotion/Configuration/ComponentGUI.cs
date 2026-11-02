@@ -9,6 +9,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
+using AuxUi;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using System;
@@ -43,75 +44,10 @@ namespace AuxEmotion
         private string stringRefIgnore = string.Empty;
         private int count = 3;
 
-        private enum TableHeaderAlign { Left, Center, Right }
-
         private float chkSize { get; set; }
         private void InitializeGui()
         {
             configGUI.whiteList.TryGetValue(AuxEmotionConfig.EveryoneKey, out selectedCharacter);
-        }
-
-        private static void TableHeaderRow(string ID, string[] infoMarker, params TableHeaderAlign[] aligns)
-        {
-            ImGui.TableNextRow();
-            for (var i = 0; i < ImGui.TableGetColumnCount(); i++)
-            {
-                ImGui.TableNextColumn();
-                var label = ImGui.TableGetColumnName(i);
-                ImGui.PushID($"{ID}Header_{i}");
-                var align = aligns.Length <= i ? TableHeaderAlign.Left : aligns[i];
-
-                switch (align)
-                {
-                    case TableHeaderAlign.Center:
-                        {
-                            var textSize = ImGui.CalcTextSize(label);
-                            var space = ImGui.GetContentRegionAvail().X;
-                            ImGui.TableHeader("");
-                            ImGui.SameLine(space / 2f - textSize.X / 2f);
-                            ImGui.Text(label);
-                            break;
-                        }
-                    case TableHeaderAlign.Right:
-                        {
-                            ImGui.TableHeader("");
-                            var textSize = ImGui.CalcTextSize(label);
-                            var space = ImGui.GetContentRegionAvail().X;
-                            ImGui.SameLine(space - textSize.X);
-                            ImGui.Text(label);
-                            break;
-                        }
-                    default:
-                        ImGui.TableHeader(label);
-                        break;
-                }
-                ImGui.PopID();
-                if (infoMarker[i].Length > 0)
-                {
-                    ImGui.SameLine(ImGui.GetContentRegionAvail().X - (19f * ImGuiHelpers.GlobalScale));
-                    ImGuiEx.InfoMarker(infoMarker[i], null, null, false);
-                }
-            }
-        }
-
-        public static void DrawTextSeparator(string ID, string Label)
-        {
-            var space = ImGuiHelpers.ScaledVector2(50f, 0f);
-            var blank = new Num.Vector2(15f, 0f);
-            var textSize = ImGui.CalcTextSize(Label);
-            var pos = ImGui.GetCursorScreenPos() + new Num.Vector2(0, textSize.Y / 2f + 1f);
-            ImGui.PushID(ID);
-            ImGui.GetWindowDrawList().AddLine(
-                pos,
-                pos + space,
-                ImGui.GetColorU32(ImGuiCol.Separator));
-            ImGui.SetCursorPosX(space.X + blank.X);
-            ImGui.Text(Label);
-            ImGui.GetWindowDrawList().AddLine(
-                pos + blank * 2 + space + textSize * Num.Vector2.UnitX,
-                pos + ImGui.GetContentRegionAvail() * Num.Vector2.UnitX,
-                ImGui.GetColorU32(ImGuiCol.Separator));
-            ImGui.PopID();
         }
 
         public void DrawDragInt(string label, ref int v, int v_speed, float item_width = 120, int v_min = 0, int v_max = 0)
@@ -123,26 +59,23 @@ namespace AuxEmotion
                 buttonSize = ((chkSize * 2f) + 1f);
             }
             ImGui.SetNextItemWidth(item_width - buttonSize);
-            ImGui.DragInt($"##{text[1]}", ref v, v_speed, v_min, v_max);
+            AuxWidgets.DragInt($"##{text[1]}", ref v, v_speed, v_min, v_max);
             if (configGUI.showPlusMinus == true)
             {
                 using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
                 {
-                    using (ImRaii.PushFont(UiBuilder.IconFont))
+                    ImGui.PushID($"buttons_{text[1]}");
+                    ImGui.SameLine();
+                    if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "plus", null, false, new Num.Vector2(chkSize)))
                     {
-                        ImGui.PushID($"buttons_{text[1]}");
-                        ImGui.SameLine();
-                        if (ImGui.Button($"{(char)FontAwesomeIcon.Plus}", new Vector2(chkSize)))
-                        {
-                            v = (v_min == 0 && v_max == 0) ? v + v_speed : Math.Min(v_max, v + v_speed);
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button($"{(char)FontAwesomeIcon.Minus}", new Vector2(chkSize)))
-                        {
-                            v = (v_min == 0 && v_max == 0) ? v - v_speed : Math.Max(v_min, v - v_speed);
-                        }
-                        ImGui.PopID();
+                        v = (v_min == 0 && v_max == 0) ? v + v_speed : Math.Min(v_max, v + v_speed);
                     }
+                    ImGui.SameLine();
+                    if (AuxWidgets.IconButton(FontAwesomeIcon.Minus, "minus", null, false, new Num.Vector2(chkSize)))
+                    {
+                        v = (v_min == 0 && v_max == 0) ? v - v_speed : Math.Max(v_min, v - v_speed);
+                    }
+                    ImGui.PopID();
                 }
             }
             if (!string.IsNullOrEmpty(text[0]))
@@ -161,26 +94,23 @@ namespace AuxEmotion
                 buttonSize = ((chkSize * 2f) + 1f);
             }
             ImGui.SetNextItemWidth(item_width - buttonSize);
-            ImGui.DragFloat($"##{text[1]}", ref v, v_speed, v_min, v_max);
+            AuxWidgets.DragFloat($"##{text[1]}", ref v, v_speed, v_min, v_max);
             if (configGUI.showPlusMinus == true)
             {
                 using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
                 {
-                    using (ImRaii.PushFont(UiBuilder.IconFont))
+                    ImGui.PushID($"buttons_{text[1]}");
+                    ImGui.SameLine();
+                    if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "plus", null, false, new Num.Vector2(chkSize)))
                     {
-                        ImGui.PushID($"buttons_{text[1]}");
-                        ImGui.SameLine();
-                        if (ImGui.Button($"{(char)FontAwesomeIcon.Plus}", new Vector2(chkSize)))
-                        {
-                            v = (v_min == 0 && v_max == 0) ? v + v_speed : Math.Min(v_max, v + v_speed);
-                        }
-                        ImGui.SameLine();
-                        if (ImGui.Button($"{(char)FontAwesomeIcon.Minus}", new Vector2(chkSize)))
-                        {
-                            v = (v_min == 0 && v_max == 0) ? v - v_speed : Math.Max(v_min, v - v_speed);
-                        }
-                        ImGui.PopID();
+                        v = (v_min == 0 && v_max == 0) ? v + v_speed : Math.Min(v_max, v + v_speed);
                     }
+                    ImGui.SameLine();
+                    if (AuxWidgets.IconButton(FontAwesomeIcon.Minus, "minus", null, false, new Num.Vector2(chkSize)))
+                    {
+                        v = (v_min == 0 && v_max == 0) ? v - v_speed : Math.Max(v_min, v - v_speed);
+                    }
+                    ImGui.PopID();
                 }
             }
             if (!string.IsNullOrEmpty(text[0]))
@@ -196,33 +126,28 @@ namespace AuxEmotion
             ImGui.SetCursorPosX(indentation.X);
         }
 
-        public static bool IconTextFrame(uint previewIcon, string previewText, bool hoverColor = false)
+        public static bool IconTextFrame(uint previewIcon, string previewText, bool isSelected = false)
         {
-            var pos = ImGui.GetCursorScreenPos();
-            var size = new Num.Vector2(ImGui.GetTextLineHeight()) + ImGui.GetStyle().FramePadding * 2;
             var frameSize = new Num.Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
+            var pressed = ImGui.Selectable($"##iconTextFrame_{previewIcon}_{previewText}", isSelected, ImGuiSelectableFlags.None, frameSize);
+            var min = ImGui.GetItemRectMin();
+            var drawlist = ImGui.GetWindowDrawList();
 
-            using (ImRaii.PushColor(ImGuiCol.FrameBg, ImGui.GetColorU32(ImGuiCol.FrameBgHovered), hoverColor && ImGui.IsMouseHoveringRect(pos, pos + frameSize)))
+            IDalamudTextureWrap? icon = null;
+            if (previewIcon != 0)
             {
-                if (ImGui.BeginChildFrame(ImGui.GetID($"iconTextFrame_{previewIcon}_{previewText}"), frameSize))
+                try
                 {
-                    var drawlist = ImGui.GetWindowDrawList();
-                    IDalamudTextureWrap? icon = null;
-                    if (previewIcon != 0)
-                    {
-                        try
-                        {
-                            icon = Svc.Texture.GetFromGameIcon(previewIcon).GetWrapOrDefault();
-                        }
-                        catch { }
-                    }
-                    if (icon != null) drawlist.AddImage(icon.Handle, pos, pos + new Num.Vector2(size.Y));
-                    var textSize = ImGui.CalcTextSize(previewText);
-                    drawlist.AddText(pos + new Num.Vector2(size.Y + ImGui.GetStyle().FramePadding.X, size.Y / 2f - textSize.Y / 2f), ImGui.GetColorU32(ImGuiCol.Text), previewText);
+                    icon = Svc.Texture.GetFromGameIcon(previewIcon).GetWrapOrDefault();
                 }
-                ImGui.EndChildFrame();
+                catch { }
             }
-            return ImGui.IsItemClicked();
+            if (icon != null) drawlist.AddImage(icon.Handle, min, min + new Num.Vector2(frameSize.Y));
+
+            var textSize = ImGui.CalcTextSize(previewText);
+            var textColor = isSelected ? AuxTheme.Accent : AuxTheme.ContentFg;
+            drawlist.AddText(min + new Num.Vector2(frameSize.Y + ImGui.GetStyle().FramePadding.X, frameSize.Y / 2f - textSize.Y / 2f), ImGui.GetColorU32(textColor), previewText);
+            return pressed;
         }
 
         private void DrawComboEmote(string ID, uint previewID, bool isExpression, ref uint outEmoteID, ref string outEmoteCommand)
@@ -245,7 +170,7 @@ namespace AuxEmotion
                 {
                     listEmote = EmoteIdentifier.ListEmote;
                 }
-                if (ImGui.BeginCombo($"##{ID}", EmoteIdentifier.FetchName(previewID), ImGuiComboFlags.HeightLargest))
+                if (AuxWidgets.BeginCombo($"##{ID}", EmoteIdentifier.FetchName(previewID), ImGuiComboFlags.HeightLargest))
                 {
                     if (ImGui.IsWindowAppearing())
                     {
@@ -254,25 +179,22 @@ namespace AuxEmotion
                     }
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    ImGui.InputTextWithHint($"##{ID}SearchInput", "Search...", ref searchInput, 40);
+                    AuxWidgets.InputTextWithHint($"##{ID}SearchInput", "Search...", ref searchInput, 40);
                     if (ImGui.BeginChild($"##{ID}SearchScroll", new Vector2(ImGui.GetContentRegionAvail().X, 300)))
                     {
-                        using (ImRaii.PushColor(ImGuiCol.FrameBgHovered, ImGui.GetColorU32(ImGuiCol.ButtonHovered)))
+                        foreach (var emote in listEmote)
                         {
-                            foreach (var emote in listEmote)
+                            if (!string.IsNullOrWhiteSpace(searchInput))
                             {
-                                if (!string.IsNullOrWhiteSpace(searchInput))
-                                {
-                                    if (!(emote.Name.Contains(searchInput, StringComparison.InvariantCultureIgnoreCase) || (ushort.TryParse(searchInput, out var searchShort) && searchShort == emote.EmoteID))) continue;
-                                }
+                                if (!(emote.Name.Contains(searchInput, StringComparison.InvariantCultureIgnoreCase) || (ushort.TryParse(searchInput, out var searchShort) && searchShort == emote.EmoteID))) continue;
+                            }
 
-                                ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                                if (IconTextFrame(emote.Icon, emote.Name, true))
-                                {
-                                    outEmoteID = emote.EmoteID;
-                                    outEmoteCommand = emote.EmoteCommand;
-                                    ImGui.CloseCurrentPopup();
-                                }
+                            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
+                            if (IconTextFrame(emote.Icon, emote.Name, emote.EmoteID == previewID))
+                            {
+                                outEmoteID = emote.EmoteID;
+                                outEmoteCommand = emote.EmoteCommand;
+                                ImGui.CloseCurrentPopup();
                             }
                         }
                         ImGui.EndChild();
@@ -295,22 +217,22 @@ namespace AuxEmotion
 
             var comboBook = Math.Clamp(macroBook, 0, 2);
             ImGui.SetNextItemWidth(half);
-            if (ImGui.BeginCombo($"##{id}Book", comboBook switch
+            if (AuxWidgets.BeginCombo($"##{id}Book", comboBook switch
             {
                 1 => "1",
                 2 => "2",
                 _ => "Off",
             }))
             {
-                if (ImGui.Selectable("Off", comboBook == 0))
+                if (AuxWidgets.ComboItem("Off", comboBook == 0))
                 {
                     comboBook = 0;
                 }
-                if (ImGui.Selectable("1", comboBook == 1))
+                if (AuxWidgets.ComboItem("1", comboBook == 1))
                 {
                     comboBook = 1;
                 }
-                if (ImGui.Selectable("2", comboBook == 2))
+                if (AuxWidgets.ComboItem("2", comboBook == 2))
                 {
                     comboBook = 2;
                 }
@@ -320,7 +242,7 @@ namespace AuxEmotion
 
             ImGui.SameLine();
             ImGui.SetNextItemWidth(half);
-            if (ImGui.InputInt($"S##{id}", ref macroSlot))
+            if (AuxWidgets.InputInt($"S##{id}", ref macroSlot))
             {
                 macroSlot = Math.Clamp(macroSlot, 0, 99);
             }
@@ -336,7 +258,7 @@ namespace AuxEmotion
                     continue;
 
                 var enabled = configGUI.allowedChannels.Contains(e);
-                if (ImGui.Checkbox($"{e}", ref enabled))
+                if (AuxWidgets.Checkbox($"{e}", ref enabled))
                 {
                     if (enabled) configGUI.allowedChannels.Add(e);
                     else configGUI.allowedChannels.Remove(e);
@@ -352,7 +274,7 @@ namespace AuxEmotion
             if (ImGui.BeginChild("TriggerChild", new Vector2(ImGui.GetContentRegionAvail().X, Math.Max(ImGui.GetContentRegionAvail().Y, 200f * ImGuiHelpers.GlobalScale)), false))
             {
                 var keywordWidth = Math.Max(100f, ImGui.GetContentRegionAvail().X - ((chkSize + 150f * 2 + 80f + 80f + 245f) * ImGuiHelpers.GlobalScale));
-                if (ImGui.BeginTable("HeaderTriggerTable", 7))
+                if (AuxWidgets.BeginTable("HeaderTriggerTable", 7))
                 {
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
                     ImGui.TableSetupColumn("Keyword", ImGuiTableColumnFlags.WidthFixed, keywordWidth);
@@ -370,7 +292,7 @@ namespace AuxEmotion
                             ,""
                             ,"The keyword with the lowest priority will take precedence if multiple applicable triggers are found in a chat message."
                     };
-                    TableHeaderRow("TriggerTable", infoMarkers, TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Center, TableHeaderAlign.Center, TableHeaderAlign.Center);
+                    AuxWidgets.TableHeaderRow("TriggerTable", infoMarkers, TableAlign.Left, TableAlign.Left, TableAlign.Left, TableAlign.Left, TableAlign.Center, TableAlign.Center, TableAlign.Center);
 
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
@@ -379,18 +301,15 @@ namespace AuxEmotion
                     {
                         ImGui.Dummy(new Vector2((chkSize * 2f) + 1f, 0f));
                         ImGui.SameLine();
-                        using (ImRaii.PushFont(UiBuilder.IconFont))
+                        if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "add", null, false, new Num.Vector2(chkSize)))
                         {
-                            if (ImGui.Button($"{(char)FontAwesomeIcon.Plus}##add", new Vector2(chkSize)))
-                            {
-                                AddNewTrigger();
-                            }
+                            AddNewTrigger();
                         }
                     }
 
                     ImGui.TableNextColumn();
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    ImGui.InputText("##newTrigger", ref newTriggerData.trigger, 100);
+                    AuxWidgets.InputText("##newTrigger", ref newTriggerData.trigger, 100);
 
                     ImGui.TableNextColumn();
                     DrawComboEmote("newEmote", newTriggerData.emoteID, false, ref newTriggerData.emoteID, ref newTriggerData.emoteCommand);
@@ -400,18 +319,18 @@ namespace AuxEmotion
 
                     ImGui.TableNextColumn();
                     ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f);
-                    ImGui.Checkbox("##newIsContains", ref newTriggerData.isContains);
+                    AuxWidgets.Checkbox("##newIsContains", ref newTriggerData.isContains);
 
                     ImGui.TableNextColumn();
                     ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f);
-                    ImGui.Checkbox("##newIsCaseSensitive", ref newTriggerData.isCaseSensitive);
+                    AuxWidgets.Checkbox("##newIsCaseSensitive", ref newTriggerData.isCaseSensitive);
 
                     ImGui.TableNextColumn();
                     DrawDragInt("##newPriority", ref newTriggerData.priority, 10, ImGui.GetContentRegionAvail().X);
 
                     ImGui.EndTable();
 
-                    if (ImGui.BeginTable("RowsTriggerTable", 7, ImGuiTableFlags.ScrollY))
+                    if (AuxWidgets.BeginTable("RowsTriggerTable", 7, true))
                     {
                         ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
                         ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, keywordWidth);
@@ -440,29 +359,25 @@ namespace AuxEmotion
 
                                     using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
                                     {
-                                        using (ImRaii.PushFont(UiBuilder.IconFont))
+                                        AuxWidgets.IconButton(FontAwesomeIcon.ArrowsUpDown, "drag", null, false, new Num.Vector2(chkSize));
+                                        if (beginDrag == -1 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
                                         {
+                                            beginDrag = i;
+                                            endDrag = i;
+                                            endDragPosition = ImGui.GetItemRectMin();
+                                        }
 
-                                            ImGui.Button($"{(char)FontAwesomeIcon.ArrowsUpDown}", new Vector2(chkSize));
-                                            if (beginDrag == -1 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                                            {
-                                                beginDrag = i;
-                                                endDrag = i;
-                                                endDragPosition = ImGui.GetItemRectMin();
-                                            }
+                                        if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
+                                        {
+                                            endDrag = i;
+                                            endDragPosition = ImGui.GetItemRectMin();
+                                        }
 
-                                            if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
-                                            {
-                                                endDrag = i;
-                                                endDragPosition = ImGui.GetItemRectMin();
-                                            }
-
-                                            ImGui.SameLine();
-                                            if (ImGui.Button($"{(char)(triggerData.isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.LockOpen)}", new Vector2(chkSize)))
-                                            {
-                                                if (triggerData.isLocked == false || ImGui.GetIO().KeyShift)
-                                                    triggerData.isLocked = !triggerData.isLocked;
-                                            }
+                                        ImGui.SameLine();
+                                        if (AuxWidgets.IconButton(triggerData.isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.LockOpen, "lock", null, false, new Num.Vector2(chkSize)))
+                                        {
+                                            if (triggerData.isLocked == false || ImGui.GetIO().KeyShift)
+                                                triggerData.isLocked = !triggerData.isLocked;
                                         }
                                         if (ImGui.IsItemHovered())
                                         {
@@ -479,15 +394,12 @@ namespace AuxEmotion
                                                 ImGui.SetTooltip("Lock Entry.");
                                             }
                                         }
-                                        using (ImRaii.PushFont(UiBuilder.IconFont))
-                                        {
-                                            if (triggerData.isLocked) ImGui.BeginDisabled(triggerData.isLocked);
+                                        if (triggerData.isLocked) ImGui.BeginDisabled(triggerData.isLocked);
 
-                                            ImGui.SameLine();
-                                            if (ImGui.Button($"{(char)FontAwesomeIcon.Trash}##delete", new Vector2(chkSize)) && ImGui.GetIO().KeyShift)
-                                            {
-                                                deleteTrigger = triggerData.trigger;
-                                            }
+                                        ImGui.SameLine();
+                                        if (AuxWidgets.IconButton(FontAwesomeIcon.Trash, "delete", null, true, new Num.Vector2(chkSize)) && ImGui.GetIO().KeyShift)
+                                        {
+                                            deleteTrigger = triggerData.trigger;
                                         }
                                         if (ImGui.IsItemHovered() && !ImGui.GetIO().KeyShift)
                                         {
@@ -497,7 +409,7 @@ namespace AuxEmotion
 
                                     ImGui.TableNextColumn();
                                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                                    if (ImGui.InputText("##trigger", ref trigger, 100))
+                                    if (AuxWidgets.InputText("##trigger", ref trigger, 100))
                                     {
                                         newTrigger = trigger;
                                         if (string.IsNullOrEmpty(oldTrigger))
@@ -518,11 +430,11 @@ namespace AuxEmotion
 
                                     ImGui.TableNextColumn();
                                     ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f - 4f);
-                                    ImGui.Checkbox("##isContains", ref triggerData.isContains);
+                                    AuxWidgets.Checkbox("##isContains", ref triggerData.isContains);
 
                                     ImGui.TableNextColumn();
                                     ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f - 4f);
-                                    ImGui.Checkbox("##isCaseSensitive", ref triggerData.isCaseSensitive);
+                                    AuxWidgets.Checkbox("##isCaseSensitive", ref triggerData.isCaseSensitive);
 
                                     ImGui.TableNextColumn();
                                     DrawDragInt("##Priority", ref triggerData.priority, 10, ImGui.GetContentRegionAvail().X);
@@ -684,16 +596,13 @@ namespace AuxEmotion
 
         public void DrawWhiteList()
         {
-            ImGui.Text("Whitelist:");
-            ImGui.SameLine();
-            ImGuiEx.InfoMarker($"Reactions configured for characters in the whitelist will take priority over Everyone reactions.{Environment.NewLine}If no specific reaction is set for a whitelisted character, the Everyone reaction will be used instead.{Environment.NewLine}You can quickly add a person to the whitelist using:{Environment.NewLine}/auxe a <name>{Environment.NewLine}/auxe add <name>");
-            ImGui.SameLine();
+            AuxWidgets.SectionLabel("Whitelist", $"Reactions configured for characters in the whitelist will take priority over Everyone reactions.{Environment.NewLine}If no specific reaction is set for a whitelisted character, the Everyone reaction will be used instead.{Environment.NewLine}You can quickly add a person to the whitelist using:{Environment.NewLine}/auxe a <name>{Environment.NewLine}/auxe add <name>");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacter, 255);
+            AuxWidgets.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacter, 255);
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - (48f * ImGuiHelpers.GlobalScale));
-            ImGui.InputTextWithHint("##ManualWhiteListName", "Add name or Name@World", ref manualWhiteListName, 255);
+            AuxWidgets.InputTextWithHint("##ManualWhiteListName", "Add name or Name@World", ref manualWhiteListName, 255);
             ImGui.SameLine();
-            if (ImGui.Button("+##addManualWhiteList"))
+            if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "addManualWhiteList", null, false, new Num.Vector2(chkSize)))
             {
                 if (configGUI.TryToAddBWListByName(manualWhiteListName, true))
                 {
@@ -703,83 +612,62 @@ namespace AuxEmotion
             }
             ImGui.Separator();
 
-            ImGui.BeginChildFrame(ImGui.GetID("whitelistChildFrame"), new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("whitelistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), false, ImGuiWindowFlags.NoBackground);
             foreach (var player in configGUI.whiteList)
             {
                 if (!string.IsNullOrEmpty(searchCharacter))
                 {
                     if (!player.Key.Contains(searchCharacter, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
-                uint isEnabledColorTrue;
-                uint isEnabledColorFalse;
-                unsafe
+                var rowStart = ImGui.GetCursorScreenPos();
+                using (ImRaii.PushColor(ImGuiCol.Text, player.Value.isEnabled ? AuxTheme.ContentFg : AuxTheme.MutedFg))
                 {
-                    Num.Vector4* color = ImGui.GetStyleColorVec4(ImGuiCol.TabActive);
-                    isEnabledColorFalse = ImGui.ColorConvertFloat4ToU32(*color);
-                    color = ImGui.GetStyleColorVec4(ImGuiCol.Text);
-                    isEnabledColorTrue = ImGui.ColorConvertFloat4ToU32(*color);
-                }
-                using (ImRaii.PushColor(ImGuiCol.Text, player.Value.isEnabled ? isEnabledColorTrue : isEnabledColorFalse))
-                {
-                    ImGui.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
+                    AuxWidgets.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
                     ImGui.SameLine();
                     if (ImGui.Selectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value))
                     {
                         selectedCharacter = player.Value;
                     }
+                    if (selectedCharacter == player.Value)
+                    {
+                        DrawSelectionBar(rowStart.X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
+                    }
                 }
             }
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
 
             ImGui.Separator();
 
             using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
             {
-                using (ImRaii.PushFont(UiBuilder.IconFont))
+                if (AuxWidgets.IconButton(FontAwesomeIcon.PersonCirclePlus, "addWhitelistTarget", "Add targeted player to the whitelist.", false, new Num.Vector2(chkSize)))
                 {
-                    if (ImGui.Button($"{(char)FontAwesomeIcon.PersonCirclePlus}##addWhitelistTarget", new Vector2(chkSize)))
-                    {
-                        configGUI.TryToAddBWList(true);
-                    }
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Add targeted player to the whitelist.");
+                    configGUI.TryToAddBWList(true);
                 }
                 ImGui.SameLine();
-                using (ImRaii.PushFont(UiBuilder.IconFont))
+                if (AuxWidgets.IconButton(FontAwesomeIcon.Trash, "removeWhitelist", $"Hold SHIFT to remove the selected player from the white list.{Environment.NewLine}{AuxEmotionConfig.EveryoneKey} can not be removed.", true, new Num.Vector2(chkSize)) && ImGui.GetIO().KeyShift)
                 {
-                    if (ImGui.Button($"{(char)FontAwesomeIcon.Trash}##removeWhitelist", new Vector2(chkSize)) && ImGui.GetIO().KeyShift)
+                    if (selectedCharacter != null)
                     {
-                        if (selectedCharacter != null)
+                        if (selectedCharacter.GetKey() != AuxEmotionConfig.EveryoneKey)
                         {
-                            if (selectedCharacter.GetKey() != AuxEmotionConfig.EveryoneKey)
-                            {
-                                configGUI.whiteList.Remove(selectedCharacter.GetKey());
-                                configGUI.whiteList.TryGetValue(AuxEmotionConfig.EveryoneKey, out selectedCharacter);
-                            }
+                            configGUI.whiteList.Remove(selectedCharacter.GetKey());
+                            configGUI.whiteList.TryGetValue(AuxEmotionConfig.EveryoneKey, out selectedCharacter);
                         }
                     }
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip($"Hold SHIFT to remove the selected player from the white list.{Environment.NewLine}{AuxEmotionConfig.EveryoneKey} can not be removed.");
                 }
             }
         }
 
         public void DrawBlackList()
         {
-            ImGui.Text("Blacklist:");
-            ImGui.SameLine();
-            ImGuiEx.InfoMarker("No reactions will be executed for characters added to the blacklist.");
-            ImGui.SameLine();
+            AuxWidgets.SectionLabel("Blacklist", "No reactions will be executed for characters added to the blacklist.");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacterB, 255);
+            AuxWidgets.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacterB, 255);
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - (48f * ImGuiHelpers.GlobalScale));
-            ImGui.InputTextWithHint("##ManualBlackListName", "Add name or Name@World", ref manualBlackListName, 255);
+            AuxWidgets.InputTextWithHint("##ManualBlackListName", "Add name or Name@World", ref manualBlackListName, 255);
             ImGui.SameLine();
-            if (ImGui.Button("+##addManualBlackList"))
+            if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "addManualBlackList", null, false, new Num.Vector2(chkSize)))
             {
                 if (configGUI.TryToAddBWListByName(manualBlackListName, false))
                 {
@@ -788,7 +676,7 @@ namespace AuxEmotion
             }
             ImGui.Separator();
 
-            ImGui.BeginChildFrame(ImGui.GetID("blacklistChildFrame"), new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("blacklistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), false, ImGuiWindowFlags.NoBackground);
             foreach (var player in configGUI.blackList)
             {
                 if (!string.IsNullOrEmpty(searchCharacterB))
@@ -799,41 +687,36 @@ namespace AuxEmotion
                 {
                     selectedCharacterB = player.Value;
                 }
+                if (selectedCharacterB == player.Value)
+                {
+                    DrawSelectionBar(ImGui.GetItemRectMin().X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
+                }
             }
-            ImGui.EndChildFrame();
+            ImGui.EndChild();
 
             ImGui.Separator();
 
             using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
             {
-                using (ImRaii.PushFont(UiBuilder.IconFont))
+                if (AuxWidgets.IconButton(FontAwesomeIcon.PersonCirclePlus, "addBlacklistTarget", "Add targeted player to the blacklist.", false, new Num.Vector2(chkSize)))
                 {
-                    if (ImGui.Button($"{(char)FontAwesomeIcon.PersonCirclePlus}##addBlacklistTarget", new Vector2(chkSize)))
-                    {
-                        configGUI.TryToAddBWList(false);
-                    }
-                }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Add targeted player to the blacklist.");
+                    configGUI.TryToAddBWList(false);
                 }
                 ImGui.SameLine();
-                using (ImRaii.PushFont(UiBuilder.IconFont))
+                if (AuxWidgets.IconButton(FontAwesomeIcon.Trash, "removeBlacklist", "Hold SHIFT to remove the selected player from the black list.", true, new Num.Vector2(chkSize)) && ImGui.GetIO().KeyShift)
                 {
-                    if (ImGui.Button($"{(char)FontAwesomeIcon.Trash}##removeBlacklist", new Vector2(chkSize)) && ImGui.GetIO().KeyShift)
+                    if (selectedCharacterB != null)
                     {
-                        if (selectedCharacterB != null)
-                        {
-                            configGUI.blackList.Remove(selectedCharacterB.GetKey());
-                            selectedCharacterB = null;
-                        }
+                        configGUI.blackList.Remove(selectedCharacterB.GetKey());
+                        selectedCharacterB = null;
                     }
                 }
-                if (ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Hold SHIFT to remove the selected player from the black list.");
-                }
             }
+        }
+
+        private static void DrawSelectionBar(float x, float top, float bottom)
+        {
+            ImGui.GetWindowDrawList().AddRectFilled(new Num.Vector2(x, top), new Num.Vector2(x + 2f * ImGuiHelpers.GlobalScale, bottom), ImGui.GetColorU32(AuxTheme.Accent));
         }
 
         public void DrawReactionList()
@@ -842,20 +725,20 @@ namespace AuxEmotion
             {
                 if (selectedCharacter == null) return;
                 var text = copyCharacterReaction.name == string.Empty ? "Copy" : $"Copied {copyCharacterReaction.name} reactions";
-                if (ImGui.Button($"{text}##Copy"))
+                if (AuxWidgets.TextButton($"{text}##Copy"))
                 {
                     copyCharacterReaction.CopyValue(selectedCharacter);
                 }
                 ImGui.SameLine();
                 text = copyCharacterReaction.name == string.Empty ? "Paste" : $"Paste rections into {selectedCharacter.name}";
-                if (ImGui.Button($"{text}##Paste"))
+                if (AuxWidgets.TextButton($"{text}##Paste"))
                 {
                     if (copyCharacterReaction != null)
                         selectedCharacter.CopyReactionList(copyCharacterReaction.reactionList);
                     copyCharacterReaction = new();
                 }
 
-                if (ImGui.BeginTable("HeaderReactionTable", 9))
+                if (AuxWidgets.BeginTable("HeaderReactionTable", 9))
                 {
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
                     ImGui.TableSetupColumn("Received Emote", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
@@ -877,8 +760,8 @@ namespace AuxEmotion
                             ,""
                             ,"The reaction with the lowest priority will take precedence if multiple applicable reaction are found."
                     };
-                    TableHeaderRow("ReactionTable", infoMarkers, TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Left,
-                        TableHeaderAlign.Left, TableHeaderAlign.Left, TableHeaderAlign.Center, TableHeaderAlign.Center, TableHeaderAlign.Center);
+                    AuxWidgets.TableHeaderRow("ReactionTable", infoMarkers, TableAlign.Left, TableAlign.Left, TableAlign.Left, TableAlign.Left,
+                        TableAlign.Left, TableAlign.Left, TableAlign.Center, TableAlign.Center, TableAlign.Center);
 
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
@@ -886,12 +769,9 @@ namespace AuxEmotion
                     {
                         ImGui.Dummy(new Vector2((chkSize * 2f) + 1f, 0f));
                         ImGui.SameLine();
-                        using (ImRaii.PushFont(UiBuilder.IconFont))
+                        if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "addReaction", null, false, new Num.Vector2(chkSize)))
                         {
-                            if (ImGui.Button($"{(char)FontAwesomeIcon.Plus}##addReaction", new Vector2(chkSize)))
-                            {
-                                AddNewReaction();
-                            }
+                            AddNewReaction();
                         }
                     }
 
@@ -915,7 +795,7 @@ namespace AuxEmotion
 
                     ImGui.TableNextColumn();
                     ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f);
-                    ImGui.Checkbox("##newTargetBack", ref newReactionData.targetBack);
+                    AuxWidgets.Checkbox("##newTargetBack", ref newReactionData.targetBack);
 
                     ImGui.TableNextColumn();
                     DrawDragInt("##newReceivedPriority", ref newReactionData.priority, 10, ImGui.GetContentRegionAvail().X);
@@ -931,7 +811,7 @@ namespace AuxEmotion
                         ImGui.Text($"No reactions are configured for {selectedCharacter.name}.{Environment.NewLine}Reactions set for Everyone will be used if available.");
                 }
 
-                if (ImGui.BeginTable("RowsReceivedTable", 9, ImGuiTableFlags.ScrollY))
+                if (AuxWidgets.BeginTable("RowsReceivedTable", 9, true))
                 {
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
@@ -956,29 +836,25 @@ namespace AuxEmotion
 
                         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.One * ImGuiHelpers.GlobalScale))
                         {
-                            using (ImRaii.PushFont(UiBuilder.IconFont))
+                            AuxWidgets.IconButton(FontAwesomeIcon.ArrowsUpDown, "drag", null, false, new Num.Vector2(chkSize));
+                            if (beginDrag == -1 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
                             {
+                                beginDrag = i;
+                                endDrag = i;
+                                endDragPosition = ImGui.GetItemRectMin();
+                            }
 
-                                ImGui.Button($"{(char)FontAwesomeIcon.ArrowsUpDown}", new Vector2(chkSize));
-                                if (beginDrag == -1 && ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                                {
-                                    beginDrag = i;
-                                    endDrag = i;
-                                    endDragPosition = ImGui.GetItemRectMin();
-                                }
+                            if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
+                            {
+                                endDrag = i;
+                                endDragPosition = ImGui.GetItemRectMin();
+                            }
 
-                                if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
-                                {
-                                    endDrag = i;
-                                    endDragPosition = ImGui.GetItemRectMin();
-                                }
-
-                                ImGui.SameLine();
-                                if (ImGui.Button($"{(char)(reactionData.isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.LockOpen)}", new Vector2(chkSize)))
-                                {
-                                    if (reactionData.isLocked == false || ImGui.GetIO().KeyShift)
-                                        reactionData.isLocked = !reactionData.isLocked;
-                                }
+                            ImGui.SameLine();
+                            if (AuxWidgets.IconButton(reactionData.isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.LockOpen, "lock", null, false, new Num.Vector2(chkSize)))
+                            {
+                                if (reactionData.isLocked == false || ImGui.GetIO().KeyShift)
+                                    reactionData.isLocked = !reactionData.isLocked;
                             }
                             if (ImGui.IsItemHovered())
                             {
@@ -995,16 +871,12 @@ namespace AuxEmotion
                                     ImGui.SetTooltip("Lock Entry.");
                                 }
                             }
-                            using (ImRaii.PushFont(UiBuilder.IconFont))
+                            if (reactionData.isLocked) ImGui.BeginDisabled(reactionData.isLocked);
+
+                            ImGui.SameLine();
+                            if (AuxWidgets.IconButton(FontAwesomeIcon.Trash, "delete", null, true, new Num.Vector2(chkSize)) && ImGui.GetIO().KeyShift)
                             {
-
-                                if (reactionData.isLocked) ImGui.BeginDisabled(reactionData.isLocked);
-
-                                ImGui.SameLine();
-                                if (ImGui.Button($"{(char)FontAwesomeIcon.Trash}##delete", new Vector2(chkSize)) && ImGui.GetIO().KeyShift)
-                                {
-                                    deleteIndex = i;
-                                }
+                                deleteIndex = i;
                             }
                             if (ImGui.IsItemHovered() && !ImGui.GetIO().KeyShift)
                             {
@@ -1032,7 +904,7 @@ namespace AuxEmotion
 
                         ImGui.TableNextColumn();
                         ImGui.SameLine(ImGui.GetContentRegionAvail().X / 2f - chkSize / 2f - 4f);
-                        ImGui.Checkbox("##rowTargetBack", ref reactionData.targetBack);
+                        AuxWidgets.Checkbox("##rowTargetBack", ref reactionData.targetBack);
 
                         ImGui.TableNextColumn();
                         DrawDragInt("##rowReceivedPriority", ref reactionData.priority, 10, ImGui.GetContentRegionAvail().X);
@@ -1090,52 +962,29 @@ namespace AuxEmotion
                 var Flags = ImGuiWindowFlags.NoDecoration |
                             ImGuiWindowFlags.AlwaysAutoResize |
                             ImGuiWindowFlags.NoFocusOnAppearing |
-                            ImGuiWindowFlags.NoNav |
-                            ImGuiWindowFlags.NoBackground;
+                            ImGuiWindowFlags.NoNav;
 
                 if (config.isStatusWinLocked)
                 {
                     Flags |= ImGuiWindowFlags.NoMove;
                 }
-                ImGui.Begin("StatusWindow", Flags);
-                try
+                using (AuxTheme.Push())
+                using (ImRaii.PushColor(ImGuiCol.WindowBg, AuxTheme.NavBg))
+                using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Num.Vector2(8f, 2f) * ImGuiHelpers.GlobalScale))
+                using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Num.Vector2(4f, 0f) * ImGuiHelpers.GlobalScale))
                 {
-                    if (config.isChatActive)
+                    ImGui.Begin("StatusWindow", Flags);
+                    try
                     {
-                        ThreadLoadImageHandler.TryGetIconTextureWrap(40, false, out var chatImg);
-                        if (chatImg != null)
-                        {
-                            ImGui.Image(chatImg.Handle, new(chkSize));
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.SetTooltip("Chat Reactions are enabled.");
-                            }
-                        }
+                        AuxWidgets.NavLabel("AuxEmotion");
+                        ImGui.SameLine();
+                        AuxWidgets.StatusChip("Chat", config.isChatActive, "Chat Reactions are enabled.");
+                        ImGui.SameLine();
+                        AuxWidgets.StatusChip("Emote", config.isReactionActive, "Emote Reactions are enabled.");
                     }
-                    else
-                    {
-                        ImGui.Dummy(new Vector2(chkSize));
-                    }
-                    ImGui.SameLine();
-                    if (config.isReactionActive)
-                    {
-                        ThreadLoadImageHandler.TryGetIconTextureWrap(9, false, out var reactionImg);
-                        if (reactionImg != null)
-                        {
-                            ImGui.Image(reactionImg.Handle, new(chkSize));
-                            if (ImGui.IsItemHovered())
-                            {
-                                ImGui.SetTooltip("Emote Reactions are enabled.");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ImGui.Dummy(new Vector2(chkSize));
-                    }
+                    catch { }
+                    ImGui.End();
                 }
-                catch { }
-                ImGui.End();
             }
         }
     }
