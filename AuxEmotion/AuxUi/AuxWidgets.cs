@@ -286,32 +286,34 @@ public static class AuxWidgets
         return open;
     }
 
-    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null)
+    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null, float textInset = 0f)
     {
         var width = size?.X > 0f ? size.Value.X : ImGui.GetContentRegionAvail().X;
         var height = size?.Y > 0f ? size.Value.Y : ImGui.GetTextLineHeight();
+        var inset = textInset * Scale;
+        var rowMin = ImGui.GetCursorScreenPos();
+        var rowMax = rowMin + new Vector2(width, height);
         var drawList = ImGui.GetWindowDrawList();
         bool pressed;
 
         drawList.ChannelsSplit(2);
         drawList.ChannelsSetCurrent(1);
+        ImGui.SetCursorScreenPos(new Vector2(rowMin.X + inset, rowMin.Y));
         using (ImRaii.PushColor(ImGuiCol.Header, AuxTheme.Transparent)
             .Push(ImGuiCol.HeaderHovered, AuxTheme.Transparent)
             .Push(ImGuiCol.HeaderActive, AuxTheme.Transparent))
         using (ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0f, 0.5f)))
         {
-            pressed = ImGui.Selectable(label, selected, ImGuiSelectableFlags.None, new Vector2(width, height));
+            pressed = ImGui.Selectable(label, selected, ImGuiSelectableFlags.None, new Vector2(width - inset, height));
         }
 
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
         var hovered = ImGui.IsItemHovered();
         drawList.ChannelsSetCurrent(0);
         var windowPosition = ImGui.GetWindowPos();
         var contentMin = windowPosition + ImGui.GetWindowContentRegionMin();
         var contentMax = windowPosition + ImGui.GetWindowContentRegionMax();
-        var fillMin = new Vector2(Math.Max(min.X, contentMin.X), Math.Max(min.Y, contentMin.Y));
-        var fillMax = new Vector2(Math.Min(max.X, contentMax.X), max.Y);
+        var fillMin = new Vector2(Math.Max(rowMin.X, contentMin.X), Math.Max(rowMin.Y, contentMin.Y));
+        var fillMax = new Vector2(Math.Min(rowMax.X, contentMax.X), rowMax.Y);
         var rounding = AuxTheme.FrameRounding * Scale;
         if (selected)
         {

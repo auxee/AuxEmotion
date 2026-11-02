@@ -596,13 +596,15 @@ namespace AuxEmotion
             }
         }
 
+        private float ListFooterReserve() => chkSize + (ImGui.GetStyle().ItemSpacing.Y * 2f) + 1f;
+
         public void DrawWhiteList()
         {
             AuxWidgets.SectionLabel("Whitelist", $"Reactions configured for characters in the whitelist will take priority over Everyone reactions.{Environment.NewLine}If no specific reaction is set for a whitelisted character, the Everyone reaction will be used instead.{Environment.NewLine}You can quickly add a person to the whitelist using:{Environment.NewLine}/auxe a <name>{Environment.NewLine}/auxe add <name>");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
             AuxWidgets.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacter, 255);
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - (48f * ImGuiHelpers.GlobalScale));
-            AuxWidgets.InputTextWithHint("##ManualWhiteListName", "Add name or Name@World", ref manualWhiteListName, 255);
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - chkSize - ImGui.GetStyle().ItemSpacing.X);
+            AuxWidgets.InputTextWithHint("##ManualWhiteListName", "Name or Name@World", ref manualWhiteListName, 255);
             ImGui.SameLine();
             if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "addManualWhiteList", null, false, new Num.Vector2(chkSize)))
             {
@@ -614,7 +616,7 @@ namespace AuxEmotion
             }
             ImGui.Separator();
 
-            ImGui.BeginChild("whitelistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), false, ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("whitelistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - ListFooterReserve()), false, ImGuiWindowFlags.NoBackground);
             foreach (var player in configGUI.whiteList)
             {
                 if (!string.IsNullOrEmpty(searchCharacter))
@@ -625,7 +627,7 @@ namespace AuxEmotion
                 {
                     AuxWidgets.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
                     ImGui.SameLine();
-                    if (AuxWidgets.RoundedSelectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight())))
+                    if (AuxWidgets.RoundedSelectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight()), 8f))
                     {
                         selectedCharacter = player.Value;
                     }
@@ -661,8 +663,8 @@ namespace AuxEmotion
             AuxWidgets.SectionLabel("Blacklist", "No reactions will be executed for characters added to the blacklist.");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
             AuxWidgets.InputTextWithHint("##SearchWhiteList", "Search...", ref searchCharacterB, 255);
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - (48f * ImGuiHelpers.GlobalScale));
-            AuxWidgets.InputTextWithHint("##ManualBlackListName", "Add name or Name@World", ref manualBlackListName, 255);
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - chkSize - ImGui.GetStyle().ItemSpacing.X);
+            AuxWidgets.InputTextWithHint("##ManualBlackListName", "Name or Name@World", ref manualBlackListName, 255);
             ImGui.SameLine();
             if (AuxWidgets.IconButton(FontAwesomeIcon.Plus, "addManualBlackList", null, false, new Num.Vector2(chkSize)))
             {
@@ -673,14 +675,14 @@ namespace AuxEmotion
             }
             ImGui.Separator();
 
-            ImGui.BeginChild("blacklistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - chkSize - (9f * ImGuiHelpers.GlobalScale)), false, ImGuiWindowFlags.NoBackground);
+            ImGui.BeginChild("blacklistChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y - ListFooterReserve()), false, ImGuiWindowFlags.NoBackground);
             foreach (var player in configGUI.blackList)
             {
                 if (!string.IsNullOrEmpty(searchCharacterB))
                 {
                     if (!player.Key.Contains(searchCharacterB, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
-                if (AuxWidgets.RoundedSelectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight())))
+                if (AuxWidgets.RoundedSelectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value, new Num.Vector2(0f, ImGui.GetFrameHeight()), 8f))
                 {
                     selectedCharacterB = player.Value;
                 }

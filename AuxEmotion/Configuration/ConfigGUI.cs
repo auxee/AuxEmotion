@@ -191,7 +191,7 @@ namespace AuxEmotion
 
         private void DrawEmoteReactionTab()
         {
-            ImGui.BeginChild("##BWLists", new Num.Vector2(200 * ImGuiHelpers.GlobalScale, ImGui.GetContentRegionAvail().Y));
+            ImGui.BeginChild("##BWLists", new Num.Vector2(260f * ImGuiHelpers.GlobalScale, ImGui.GetContentRegionAvail().Y));
             using (ImRaii.PushColor(ImGuiCol.ChildBg, AuxTheme.RowAlt))
             {
                 ImGui.BeginChild("##BoxWhitelist", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y / 2), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
