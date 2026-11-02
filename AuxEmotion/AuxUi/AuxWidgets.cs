@@ -286,7 +286,7 @@ public static class AuxWidgets
         return open;
     }
 
-    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null, float padLeft = 0f)
+    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null)
     {
         var width = size?.X > 0f ? size.Value.X : ImGui.GetContentRegionAvail().X;
         var height = size?.Y > 0f ? size.Value.Y : ImGui.GetTextLineHeight();
@@ -307,15 +307,19 @@ public static class AuxWidgets
         var max = ImGui.GetItemRectMax();
         var hovered = ImGui.IsItemHovered();
         drawList.ChannelsSetCurrent(0);
-        var fillMin = new Vector2(min.X - padLeft * Scale, min.Y);
+        var windowPosition = ImGui.GetWindowPos();
+        var contentMin = windowPosition + ImGui.GetWindowContentRegionMin();
+        var contentMax = windowPosition + ImGui.GetWindowContentRegionMax();
+        var fillMin = new Vector2(Math.Max(min.X, contentMin.X), Math.Max(min.Y, contentMin.Y));
+        var fillMax = new Vector2(Math.Min(max.X, contentMax.X), max.Y);
         var rounding = AuxTheme.FrameRounding * Scale;
         if (selected)
         {
-            drawList.AddRectFilled(fillMin, max, ImGui.GetColorU32(AuxTheme.AccentSelection), rounding);
+            drawList.AddRectFilled(fillMin, fillMax, ImGui.GetColorU32(AuxTheme.AccentSelection), rounding);
         }
         else if (hovered)
         {
-            drawList.AddRectFilled(fillMin, max, ImGui.GetColorU32(AuxTheme.HoverTint), rounding);
+            drawList.AddRectFilled(fillMin, fillMax, ImGui.GetColorU32(AuxTheme.HoverTint), rounding);
         }
 
         drawList.ChannelsMerge();
