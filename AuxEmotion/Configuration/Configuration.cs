@@ -35,50 +35,49 @@ public class AuxEmotionConfig : IPluginConfiguration
     public List<string> triggerOrder = [];
     public List<XivChatType> allowedChannels { get; set; } = [XivChatType.Say];
 
-    //OBSOLETE, only for old version config loading
     public readonly bool[] visibleChannels =
         {
-            false,//None
-            false,//None
-            false,//None
-            false,//None
-            true,//Say
-            true,//Shout
-            true,//TellOutgoing
-            false,//TellIncoming
-            true,//Party
-            true,//Alliance
-            true,//Ls1
-            true,//Ls2
-            true,//Ls3
-            true,//Ls4
-            true,//Ls5
-            true,//Ls6
-            true,//Ls7
-            true,//Ls8
-            true,//FreeCompany
-            true,//NoviceNetwork
-            true,//CustomEmote
-            false,//StandardEmote
-            true,//Yell
-            true,//CrossParty
-            false,//PvPTeam
-            true,//CrossLinkShell1
-            true,//Echo
-            false,//None
-            false,//None
-            false,//None
-            false,//None
-            false,//None
-            false,//None
-            false,//None
-            true,//CrossLinkShell2
-            true,//CrossLinkShell3
-            true,//CrossLinkShell4
-            true,//CrossLinkShell5
-            true,//CrossLinkShell6
-            true,//CrossLinkShell7
-            true//CrossLinkShell8
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
         };
 
     public Dictionary<XivChatType, bool> visibleChannelsDictionary = CreateVisibleChannels();

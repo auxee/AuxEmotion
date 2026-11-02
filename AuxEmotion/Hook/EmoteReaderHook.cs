@@ -28,8 +28,6 @@ namespace AuxEmotion.Hooks
 
         void OnEmoteDetour(ulong unk, ulong instigatorAddr, ushort emoteId, ulong targetId, ulong unk2)
         {
-            // unk - some field of event framework singleton? doesn't matter here anyway
-            //PluginServices.PluginLog.Info($"Emote >> unk:{unk:X}, instigatorAddr:{instigatorAddr:X}, emoteId:{emoteId}, targetId:{targetId:X}, unk2:{unk2:X}");
 
             if (Svc.Objects.LocalPlayer != null)
             {

@@ -22,11 +22,9 @@ namespace AuxEmotion.ChatMessages
         {
             var now = DateTime.UtcNow;
 
-            // Ottiene o crea il dizionario delle azioni per l'utente
             var userActions = cache.GetOrAdd(userID,
                 _ => new ConcurrentDictionary<uint, (DateTime, int)>());
 
-            // Se l'utente non ha mai fatto questa azione
             if (!userActions.TryGetValue(emoteID, out var emoteInfo))
             {
                 return true;
@@ -34,13 +32,11 @@ namespace AuxEmotion.ChatMessages
 
             var (lastTime, count) = emoteInfo;
 
-            // Verifica se il timeout è scaduto
             if ((now - lastTime).TotalSeconds > timeoutSeconds)
             {
                 return true;
             }
 
-            // Verifica se ha raggiunto il limite massimo di azioni
             return count < maxActions;
         }
 
@@ -82,7 +78,6 @@ namespace AuxEmotion.ChatMessages
                     userActions.TryRemove(action, out _);
                 }
 
-                // Rimuovi l'utente se non ha più azioni
                 if (userActions.IsEmpty)
                 {
                     cache.TryRemove(userPair.Key, out _);

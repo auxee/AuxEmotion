@@ -413,13 +413,13 @@ namespace AuxEmotion
 
                     if (ImGui.BeginTable("RowsTriggerTable", 7, ImGuiTableFlags.ScrollY))
                     {
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale); //Buttons
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, keywordWidth); //Keyword
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale); //Emote
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale); //Expression
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale); //Contained
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale); //Case Sensitive
-                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, ImGui.GetContentRegionAvail().X); //Priority
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, keywordWidth);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale);
+                        ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, ImGui.GetContentRegionAvail().X);
 
                         string deleteTrigger = string.Empty;
                         bool isModified = false;
@@ -449,7 +449,6 @@ namespace AuxEmotion
                                                 beginDrag = i;
                                                 endDrag = i;
                                                 endDragPosition = ImGui.GetItemRectMin();
-                                                //Svc.Log.Debug($"Begin {beginDrag} {endDragPosition}");
                                             }
 
                                             if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
@@ -538,7 +537,6 @@ namespace AuxEmotion
                             i++;
                         }
 
-                        // TRIGGER MODIFIED
                         if (isModified)
                         {
                             newTrigger = newTrigger.Trim();
@@ -546,9 +544,7 @@ namespace AuxEmotion
                             newTrigger = string.Empty;
                             oldTrigger = string.Empty;
                         }
-                        // END TRIGGER MODIFIED
 
-                        // BUTTON DELETE PRESSED
                         if (!string.IsNullOrEmpty(deleteTrigger))
                         {
                             if (configGUI.triggerLists.TryGetValue(deleteTrigger, out var value))
@@ -568,7 +564,6 @@ namespace AuxEmotion
                             }
                             deleteTrigger = string.Empty;
                         }
-                        // END BUTTON DELETE PRESSED
 
                         ImGui.PopID();
                         ImGui.EndTable();
@@ -577,7 +572,6 @@ namespace AuxEmotion
                         {
                             if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
                             {
-                                //Svc.Log.Debug($"End {endDrag}");
                                 if (endDrag != beginDrag)
                                 {
                                     var move = configGUI.triggerOrder[beginDrag];
@@ -609,7 +603,6 @@ namespace AuxEmotion
                 {
                     if (value.Exists(v => v.trigger == newTriggerData.trigger))
                     {
-                        //Notify.Error($"Trigger '{newTriggerData.trigger}' already exists.");
                         Svc.Toasts.ShowError($"Trigger '{newTriggerData.trigger}' already exists.");
                         return;
                     }
@@ -662,7 +655,6 @@ namespace AuxEmotion
 
                 if (isExists)
                 {
-                    //Notify.Error($"Trigger '{newTrigger}' already exists.");
                     Svc.Toasts.ShowError($"Trigger '{newTrigger}' already exists.");
                     return;
                 }
@@ -941,15 +933,15 @@ namespace AuxEmotion
 
                 if (ImGui.BeginTable("RowsReceivedTable", 9, ImGuiTableFlags.ScrollY))
                 {
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);//Buttons
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);//Received Emote
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);//Response Emote
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);//Response Expression
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 170f * ImGuiHelpers.GlobalScale);//Response Macro
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 120f * ImGuiHelpers.GlobalScale);//Distance (yalms)
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 120f * ImGuiHelpers.GlobalScale);//Response Delay (ms)
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale);//Target Back
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, ImGui.GetContentRegionAvail().X);//Priority
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, chkSize * 3f + 3f * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, (chkSize + 150f) * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 170f * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 120f * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 120f * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 80f * ImGuiHelpers.GlobalScale);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, ImGui.GetContentRegionAvail().X);
 
                     int deleteIndex = -1;
                     int i = 0;
@@ -973,7 +965,6 @@ namespace AuxEmotion
                                     beginDrag = i;
                                     endDrag = i;
                                     endDragPosition = ImGui.GetItemRectMin();
-                                    //Svc.Log.Debug($"Begin {beginDrag} {endDragPosition}");
                                 }
 
                                 if (beginDrag >= 0 && MouseWithin(ImGui.GetItemRectMin(), new Vector2(windowMax.X, ImGui.GetItemRectMax().Y)))
@@ -1060,7 +1051,6 @@ namespace AuxEmotion
                     {
                         if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
                         {
-                            //Svc.Log.Debug($"End {endDrag}");
                             if (endDrag != beginDrag && selectedCharacter != null)
                             {
                                 var move = selectedCharacter.reactionList[beginDrag];
@@ -1112,7 +1102,7 @@ namespace AuxEmotion
                 {
                     if (config.isChatActive)
                     {
-                        ThreadLoadImageHandler.TryGetIconTextureWrap(40, false, out var chatImg);//45
+                        ThreadLoadImageHandler.TryGetIconTextureWrap(40, false, out var chatImg);
                         if (chatImg != null)
                         {
                             ImGui.Image(chatImg.Handle, new(chkSize));

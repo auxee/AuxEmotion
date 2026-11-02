@@ -17,7 +17,6 @@ namespace AuxEmotion.Utility
 
         public static bool IsCharacterAvailable(AuxEmotionConfig config)
         {
-            //if (GenericHelpers.IsOccupied()) return false;
             if (Svc.Condition[ConditionFlag.InCombat]
                || Svc.Condition[ConditionFlag.Occupied]
                || Svc.Condition[ConditionFlag.Occupied30]
@@ -32,7 +31,6 @@ namespace AuxEmotion.Utility
                || Svc.Condition[ConditionFlag.WatchingCutscene78]
                || Svc.Condition[ConditionFlag.BetweenAreas]
                || Svc.Condition[ConditionFlag.BetweenAreas51]
-               //|| Svc.Condition[ConditionFlag.InThatPosition]
                || Svc.Condition[ConditionFlag.TradeOpen]
                || Svc.Condition[ConditionFlag.Crafting]
                || Svc.Condition[ConditionFlag.ExecutingCraftingAction]

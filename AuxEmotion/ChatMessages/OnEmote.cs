@@ -51,11 +51,11 @@ namespace AuxEmotion
 
                 IOrderedEnumerable<ReactionData>? reactions = null;
                 var characterData = FindWhiteListCharacter(playerName, worldName);
-                if (characterData != null && characterData.isEnabled) //Character in whitelist
+                if (characterData != null && characterData.isEnabled)
                 {
                     reactions = characterData.reactionList.Where(r => r.receivedEmoteID == emoteId).OrderBy(r => r.priority);
                 }
-                if (characterData == null || reactions == null || !reactions.Any()) //Character not in whitelist or not reactions for that emote
+                if (characterData == null || reactions == null || !reactions.Any())
                 {
                     config.whiteList.TryGetValue(AuxEmotionConfig.EveryoneKey, out characterData);
                     if (characterData != null && characterData.isEnabled)

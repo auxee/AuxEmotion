@@ -17,7 +17,6 @@ namespace AuxEmotion
             chkSize = 23f * ImGuiHelpers.GlobalScale;
             if (isOpenConfig)
             {
-                //ImGui.SetNextWindowSizeConstraints(new Num.Vector2900 * ImGuiHelpers.GlobalScale, 910 * ImGuiHelpers.GlobalScale), new Num.Vector2(900 * ImGuiHelpers.GlobalScale, float.MaxValue));
 #if DEBUG
                 ImGui.Begin("[DEBUG] AuxEmotion Configuration Window##AuxEmotionConfigWin", ref isOpenConfig, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 #else

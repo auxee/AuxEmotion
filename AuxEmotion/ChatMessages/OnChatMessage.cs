@@ -23,10 +23,8 @@ namespace AuxEmotion
 
         private string AppendBackslashToNonAlphanumeric(string input)
         {
-            // Regular expression to match non-alphanumeric characters
             Regex regex = new Regex(@"[^a-zA-Z0-9]");
 
-            // Replace non-alphanumeric characters with themselves followed by a backslash
             string result = regex.Replace(input, match => "\\" + match.Value);
 
             return result;
@@ -175,7 +173,6 @@ namespace AuxEmotion
                     }
                     else if (data.isContains || data.trigger.Contains(" "))
                     {
-                        // Check if the search text is contained anywhere in the text
                         isMatch = CompareStrings(input, data.trigger, data.isCaseSensitive, false);
                     }
                     else
