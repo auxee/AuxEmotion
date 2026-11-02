@@ -31,13 +31,13 @@ public static class AuxTheme
     public const float TitleBarHeight = 36f;
     public const float SmallFontRatio = 0.8f;
     public const float ScrollbarWidth = 8f;
-    public const float WindowRounding = 10f;
-    public const float ChildRounding = 8f;
-    public const float FrameRounding = 6f;
-    public const float PopupRounding = 8f;
-    public const float GrabRounding = 6f;
-    public const float ScrollbarRounding = 6f;
-    public const float CheckboxRounding = 4f;
+    public const float WindowRounding = 5f;
+    public const float ChildRounding = 4f;
+    public const float FrameRounding = 3f;
+    public const float PopupRounding = 4f;
+    public const float GrabRounding = 3f;
+    public const float ScrollbarRounding = 3f;
+    public const float CheckboxRounding = 2f;
 
     public static float Scale => ImGuiHelpers.GlobalScale;
 

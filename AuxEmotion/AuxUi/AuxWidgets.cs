@@ -108,11 +108,11 @@ public static class AuxWidgets
             var max = new Vector2(x + width, start.Y + height);
             if (i == selected)
             {
-                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.Accent), height / 2f);
+                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.Accent), height / 4f);
             }
             else if (hovered)
             {
-                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.HoverTint), height / 2f);
+                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.HoverTint), height / 4f);
             }
 
             var color = i == selected ? AuxTheme.OnAccent : AuxTheme.MutedFg;
@@ -170,7 +170,7 @@ public static class AuxWidgets
             .Push(ImGuiCol.ButtonHovered, primary ? AuxTheme.AccentHover : AuxTheme.HoverTint)
             .Push(ImGuiCol.ButtonActive, primary ? AuxTheme.AccentDeep : AuxTheme.ActiveTint);
         using var styles = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(TextButtonPaddingX * Scale, AuxTheme.FramePadding.Y))
-            .Push(ImGuiStyleVar.FrameRounding, ImGui.GetFrameHeight() / 2f);
+            .Push(ImGuiStyleVar.FrameRounding, ImGui.GetFrameHeight() / 4f);
         return ImGui.Button(label);
     }
 
@@ -182,7 +182,7 @@ public static class AuxWidgets
         bool hovered;
 
         using (ImRaii.PushFont(UiBuilder.IconFont))
-        using (ImRaii.PushStyle(ImGuiStyleVar.FrameRounding, Math.Min(buttonSize.X, buttonSize.Y) / 2f))
+        using (ImRaii.PushStyle(ImGuiStyleVar.FrameRounding, Math.Min(buttonSize.X, buttonSize.Y) / 4f))
         using (ImRaii.PushColor(ImGuiCol.Button, AuxTheme.Transparent)
             .Push(ImGuiCol.ButtonHovered, AuxTheme.HoverTint)
             .Push(ImGuiCol.ButtonActive, AuxTheme.ActiveTint))
@@ -286,27 +286,40 @@ public static class AuxWidgets
         return open;
     }
 
-    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null)
+    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null, float padLeft = 0f)
     {
-        var min = ImGui.GetCursorScreenPos();
         var width = size?.X > 0f ? size.Value.X : ImGui.GetContentRegionAvail().X;
         var height = size?.Y > 0f ? size.Value.Y : ImGui.GetTextLineHeight();
-        var max = min + new Vector2(width, height);
-        var hovered = ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(min, max);
+        var drawList = ImGui.GetWindowDrawList();
+        bool pressed;
+
+        drawList.ChannelsSplit(2);
+        drawList.ChannelsSetCurrent(1);
+        using (ImRaii.PushColor(ImGuiCol.Header, AuxTheme.Transparent)
+            .Push(ImGuiCol.HeaderHovered, AuxTheme.Transparent)
+            .Push(ImGuiCol.HeaderActive, AuxTheme.Transparent))
+        using (ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0f, 0.5f)))
+        {
+            pressed = ImGui.Selectable(label, selected, ImGuiSelectableFlags.None, new Vector2(width, height));
+        }
+
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        var hovered = ImGui.IsItemHovered();
+        drawList.ChannelsSetCurrent(0);
+        var fillMin = new Vector2(min.X - padLeft * Scale, min.Y);
         var rounding = AuxTheme.FrameRounding * Scale;
         if (selected)
         {
-            ImGui.GetWindowDrawList().AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.AccentSelection), rounding);
+            drawList.AddRectFilled(fillMin, max, ImGui.GetColorU32(AuxTheme.AccentSelection), rounding);
         }
         else if (hovered)
         {
-            ImGui.GetWindowDrawList().AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.HoverTint), rounding);
+            drawList.AddRectFilled(fillMin, max, ImGui.GetColorU32(AuxTheme.HoverTint), rounding);
         }
 
-        using var colors = ImRaii.PushColor(ImGuiCol.Header, AuxTheme.Transparent)
-            .Push(ImGuiCol.HeaderHovered, AuxTheme.Transparent)
-            .Push(ImGuiCol.HeaderActive, AuxTheme.Transparent);
-        return ImGui.Selectable(label, selected, ImGuiSelectableFlags.None, new Vector2(width, height));
+        drawList.ChannelsMerge();
+        return pressed;
     }
 
     public static bool ComboItem(string label, bool selected) => RoundedSelectable(label, selected);
@@ -391,7 +404,7 @@ public static class AuxWidgets
         var (fillMin, fillMax) = AuxGauge.FillRect(min, max, fraction);
         if (fillMax.X > fillMin.X)
         {
-            var radius = Math.Min((fillMax.Y - fillMin.Y) / 2f, (fillMax.X - fillMin.X) / 2f);
+            var radius = Math.Min((fillMax.Y - fillMin.Y) / 4f, (fillMax.X - fillMin.X) / 4f);
             ImGui.GetWindowDrawList().AddRectFilled(fillMin, fillMax, ImGui.GetColorU32(color), radius);
         }
     }
@@ -422,7 +435,7 @@ public static class AuxWidgets
             var hovered = ImGui.IsItemHovered();
 
             var drawList = ImGui.GetWindowDrawList();
-            drawList.AddRectFilled(position, position + size, ImGui.GetColorU32(enabled ? AuxTheme.Accent : AuxTheme.CellBg), size.Y / 2f);
+            drawList.AddRectFilled(position, position + size, ImGui.GetColorU32(enabled ? AuxTheme.Accent : AuxTheme.CellBg), size.Y / 4f);
             drawList.AddText(position + padding, ImGui.GetColorU32(enabled ? AuxTheme.OnAccent : AuxTheme.MutedFg), text);
 
             if (enabled && hovered && tooltip != null)
