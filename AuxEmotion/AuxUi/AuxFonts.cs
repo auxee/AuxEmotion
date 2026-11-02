@@ -29,37 +29,28 @@ public static class AuxFonts
         var regularPath = Path.Combine(directory, FontFolder, RegularFile);
         var boldPath = Path.Combine(directory, FontFolder, BoldFile);
         var atlas = pluginInterface.UiBuilder.FontAtlas;
-        var sizePx = pluginInterface.UiBuilder.FontDefaultSizePx;
 
         body = atlas.NewDelegateFontHandle(build => build.OnPreBuild(toolkit =>
-        {
-            var lato = toolkit.AddFontFromFile(regularPath, new SafeFontConfig
-            {
-                SizePx = sizePx,
-                GlyphRanges = LatinRanges(),
-            });
-            toolkit.AddGameGlyphs(new GameFontStyle(GameFontFamily.Axis, sizePx), FallbackRanges(), lato);
-            toolkit.AddGameSymbol(new SafeFontConfig { SizePx = sizePx, MergeFont = lato });
-            toolkit.Font = lato;
-        }));
+            BuildFont(toolkit, regularPath, pluginInterface.UiBuilder.FontDefaultSizePx)));
 
         bold = atlas.NewDelegateFontHandle(build => build.OnPreBuild(toolkit =>
-        {
-            toolkit.Font = toolkit.AddFontFromFile(boldPath, new SafeFontConfig
-            {
-                SizePx = sizePx,
-                GlyphRanges = LatinRanges(),
-            });
-        }));
+            BuildFont(toolkit, boldPath, pluginInterface.UiBuilder.FontDefaultSizePx)));
 
         smallBold = atlas.NewDelegateFontHandle(build => build.OnPreBuild(toolkit =>
+            BuildFont(toolkit, boldPath, pluginInterface.UiBuilder.FontDefaultSizePx * AuxTheme.SmallFontRatio)));
+    }
+
+    private static void BuildFont(IFontAtlasBuildToolkitPreBuild toolkit, string path, float sizePx)
+    {
+        var lato = toolkit.AddFontFromFile(path, new SafeFontConfig
         {
-            toolkit.Font = toolkit.AddFontFromFile(boldPath, new SafeFontConfig
-            {
-                SizePx = sizePx * AuxTheme.SmallFontRatio,
-                GlyphRanges = LatinRanges(),
-            });
-        }));
+            SizePx = sizePx,
+            GlyphRanges = LatinRanges(),
+        });
+        toolkit.AddGameGlyphs(new GameFontStyle(GameFontFamily.Axis, sizePx), FallbackRanges(), lato);
+        toolkit.AddGameSymbol(new SafeFontConfig { SizePx = sizePx, MergeFont = lato });
+        toolkit.AttachExtraGlyphsForDalamudLanguage(new SafeFontConfig { SizePx = sizePx, MergeFont = lato });
+        toolkit.Font = lato;
     }
 
     public static void Dispose()
