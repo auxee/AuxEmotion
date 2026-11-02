@@ -129,7 +129,7 @@ namespace AuxEmotion
         public static bool IconTextFrame(uint previewIcon, string previewText, bool isSelected = false)
         {
             var frameSize = new Num.Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
-            var pressed = ImGui.Selectable($"##iconTextFrame_{previewIcon}_{previewText}", isSelected, ImGuiSelectableFlags.None, frameSize);
+            var pressed = AuxWidgets.RoundedSelectable($"##iconTextFrame_{previewIcon}_{previewText}", isSelected, frameSize);
             var min = ImGui.GetItemRectMin();
             var drawlist = ImGui.GetWindowDrawList();
 
@@ -145,7 +145,7 @@ namespace AuxEmotion
             if (icon != null) drawlist.AddImage(icon.Handle, min, min + new Num.Vector2(frameSize.Y));
 
             var textSize = ImGui.CalcTextSize(previewText);
-            var textColor = isSelected ? AuxTheme.Accent : AuxTheme.ContentFg;
+            var textColor = AuxTheme.ContentFg;
             drawlist.AddText(min + new Num.Vector2(frameSize.Y + ImGui.GetStyle().FramePadding.X, frameSize.Y / 2f - textSize.Y / 2f), ImGui.GetColorU32(textColor), previewText);
             return pressed;
         }
@@ -621,19 +621,13 @@ namespace AuxEmotion
                 {
                     if (!player.Key.Contains(searchCharacter, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
-                var rowStart = ImGui.GetCursorScreenPos();
                 using (ImRaii.PushColor(ImGuiCol.Text, player.Value.isEnabled ? AuxTheme.ContentFg : AuxTheme.MutedFg))
                 {
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + SelectionGutter());
                     AuxWidgets.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
                     ImGui.SameLine();
-                    if (ImGui.Selectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value))
+                    if (AuxWidgets.RoundedSelectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value))
                     {
                         selectedCharacter = player.Value;
-                    }
-                    if (selectedCharacter == player.Value)
-                    {
-                        DrawSelectionBar(rowStart.X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
                     }
                 }
             }
@@ -686,15 +680,9 @@ namespace AuxEmotion
                 {
                     if (!player.Key.Contains(searchCharacterB, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
-                var rowStart = ImGui.GetCursorScreenPos();
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + SelectionGutter());
-                if (ImGui.Selectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value))
+                if (AuxWidgets.RoundedSelectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value))
                 {
                     selectedCharacterB = player.Value;
-                }
-                if (selectedCharacterB == player.Value)
-                {
-                    DrawSelectionBar(rowStart.X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
                 }
             }
             ImGui.EndChild();
@@ -717,13 +705,6 @@ namespace AuxEmotion
                     }
                 }
             }
-        }
-
-        private static float SelectionGutter() => 6f * ImGuiHelpers.GlobalScale;
-
-        private static void DrawSelectionBar(float x, float top, float bottom)
-        {
-            ImGui.GetWindowDrawList().AddRectFilled(new Num.Vector2(x, top), new Num.Vector2(x + 2f * ImGuiHelpers.GlobalScale, bottom), ImGui.GetColorU32(AuxTheme.Accent));
         }
 
         public void DrawReactionList()
@@ -976,7 +957,8 @@ namespace AuxEmotion
                 }
                 using (AuxTheme.Push())
                 using (ImRaii.PushColor(ImGuiCol.WindowBg, AuxTheme.NavBg))
-                using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Num.Vector2(8f, 2f) * ImGuiHelpers.GlobalScale))
+                using (ImRaii.PushStyle(ImGuiStyleVar.WindowRounding, AuxTheme.WindowRounding * ImGuiHelpers.GlobalScale))
+                using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Num.Vector2(8f, 4f) * ImGuiHelpers.GlobalScale))
                 using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Num.Vector2(4f, 0f) * ImGuiHelpers.GlobalScale))
                 {
                     ImGui.Begin("StatusWindow", Flags);

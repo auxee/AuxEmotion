@@ -13,6 +13,7 @@ namespace AuxEmotion
     public partial class AuxEmotionPlugin : IDalamudPlugin
     {
         private static readonly string[] tabLabels = ["Settings", "Chat Reaction", "Emote Reaction"];
+        private static readonly TitleBarAction[] titleActions = [new("Revert Change"), new("Save"), new("Save and Close", true)];
         private int selectedTab;
 
         private unsafe void DrawConfigUI()
@@ -36,7 +37,22 @@ namespace AuxEmotion
                 ImGui.SetNextWindowSizeConstraints(new Num.Vector2(520f, 320f) * ImGuiHelpers.GlobalScale, new Num.Vector2(float.MaxValue, float.MaxValue));
                 ImGui.Begin(windowName, ref isOpenConfig, ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
-                if (AuxWidgets.TitleBar(windowTitle, AuxWidgets.CloseButton) == 0)
+                var titleBar = AuxWidgets.TitleBar(windowTitle, titleActions, AuxWidgets.CloseButton);
+                switch (titleBar.Action)
+                {
+                    case 0:
+                        LoadConfig();
+                        InitializeGui();
+                        break;
+                    case 1:
+                        SaveConfig();
+                        break;
+                    case 2:
+                        SaveConfig();
+                        isOpenConfig = false;
+                        break;
+                }
+                if (titleBar.Button == 0)
                 {
                     isOpenConfig = false;
                 }
@@ -44,7 +60,7 @@ namespace AuxEmotion
                 selectedTab = AuxWidgets.Tabs("##MainTabs", tabLabels, selectedTab);
                 ImGui.Dummy(new Num.Vector2(0f, 2f * ImGuiHelpers.GlobalScale));
 
-                if (ImGui.BeginChild("##MainChild", new Num.Vector2(ImGui.GetContentRegionAvail().X, AuxWidgets.BodyHeightAboveFooter), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                if (ImGui.BeginChild("##MainChild", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
                     switch (selectedTab)
                     {
@@ -60,21 +76,6 @@ namespace AuxEmotion
                     }
                 }
                 ImGui.EndChild();
-
-                switch (AuxWidgets.FooterBar(new FooterAction("Revert Change"), new FooterAction("Save"), new FooterAction("Save and Close", true)))
-                {
-                    case 0:
-                        LoadConfig();
-                        InitializeGui();
-                        break;
-                    case 1:
-                        SaveConfig();
-                        break;
-                    case 2:
-                        SaveConfig();
-                        isOpenConfig = false;
-                        break;
-                }
 
                 ImGui.End();
             }

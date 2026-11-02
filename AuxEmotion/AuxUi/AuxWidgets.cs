@@ -10,56 +10,78 @@ public enum TableAlign { Left, Center, Right }
 
 public readonly record struct TitleBarButton(FontAwesomeIcon Icon, string Tooltip);
 
-public readonly record struct FooterAction(string Label, bool Primary = false);
+public readonly record struct TitleBarAction(string Label, bool Primary = false);
+
+public readonly record struct TitleBarResult(int Action, int Button);
 
 public static class AuxWidgets
 {
     public static readonly TitleBarButton CloseButton = new(FontAwesomeIcon.Times, "Close");
 
     private const float HintIconWidth = 16f;
-    private const float TabGap = 18f;
-    private const float TabPadding = 4f;
-    private const float TextButtonPaddingX = 10f;
-    private const float ChipPaddingX = 7f;
+    private const float TabGap = 4f;
+    private const float TabPaddingX = 14f;
+    private const float TextButtonPaddingX = 14f;
+    private const float ChipPaddingX = 8f;
     private const float ChipPaddingY = 3f;
-    private const float AccentLineThickness = 2f;
+    private const float MarkerWidth = 3f;
+    private const float MarkerHeight = 12f;
 
     private static float Scale => AuxTheme.Scale;
 
-    public static float FooterHeight => AuxTheme.FooterBarHeight * Scale;
-
-    public static float BodyHeightAboveFooter => ImGui.GetContentRegionAvail().Y + AuxTheme.WindowPadding.Y - FooterHeight;
-
-    public static int TitleBar(string title, params TitleBarButton[] buttons)
+    public static TitleBarResult TitleBar(string title, TitleBarAction[] actions, params TitleBarButton[] buttons)
     {
         var windowPosition = ImGui.GetWindowPos();
         var windowWidth = ImGui.GetWindowWidth();
         var height = AuxTheme.TitleBarHeight * Scale;
         var drawList = ImGui.GetWindowDrawList();
 
-        drawList.AddRectFilled(windowPosition, windowPosition + new Vector2(windowWidth, height), ImGui.GetColorU32(AuxTheme.NavBg));
-        drawList.AddRectFilled(windowPosition, windowPosition + new Vector2(AccentLineThickness * Scale, height), ImGui.GetColorU32(AuxTheme.Accent));
+        drawList.AddRectFilled(windowPosition, windowPosition + new Vector2(windowWidth, height), ImGui.GetColorU32(AuxTheme.NavBg), AuxTheme.WindowRounding * Scale, ImDrawFlags.RoundCornersTop);
+
+        var dotRadius = 4f * Scale;
+        drawList.AddCircleFilled(new Vector2(windowPosition.X + 16f * Scale, windowPosition.Y + height / 2f), dotRadius, ImGui.GetColorU32(AuxTheme.Accent));
 
         using (AuxFonts.PushBold())
         {
             var textSize = ImGui.CalcTextSize(title);
-            var textPosition = new Vector2(windowPosition.X + 12f * Scale, windowPosition.Y + MathF.Floor((height - textSize.Y) / 2f));
+            var textPosition = new Vector2(windowPosition.X + 30f * Scale, windowPosition.Y + MathF.Floor((height - textSize.Y) / 2f));
             drawList.AddText(textPosition, ImGui.GetColorU32(AuxTheme.NavFg), title);
         }
 
-        var clicked = -1;
-        for (var i = 0; i < buttons.Length; i++)
+        var frameHeight = ImGui.GetFrameHeight();
+        var top = windowPosition.Y + MathF.Floor((height - frameHeight) / 2f);
+        var spacing = AuxTheme.ItemSpacing.X;
+        var right = windowPosition.X + windowWidth - 10f * Scale;
+        var clickedButton = -1;
+        var clickedAction = -1;
+
+        for (var i = buttons.Length - 1; i >= 0; i--)
         {
-            var left = windowPosition.X + windowWidth - height * (buttons.Length - i);
-            ImGui.SetCursorScreenPos(new Vector2(left, windowPosition.Y));
-            if (IconButton(buttons[i].Icon, $"titleBar{i}", buttons[i].Tooltip, false, new Vector2(height)))
+            right -= frameHeight;
+            ImGui.SetCursorScreenPos(new Vector2(right, top));
+            if (IconButton(buttons[i].Icon, $"titleBar{i}", buttons[i].Tooltip, false, new Vector2(frameHeight)))
             {
-                clicked = i;
+                clickedButton = i;
             }
+
+            right -= spacing;
         }
 
-        ImGui.SetCursorPos(new Vector2(AuxTheme.WindowPadding.X, height + AuxTheme.WindowPadding.Y));
-        return clicked;
+        for (var i = actions.Length - 1; i >= 0; i--)
+        {
+            var width = TextButtonWidth(actions[i].Label);
+            right -= width;
+            ImGui.SetCursorScreenPos(new Vector2(right, top));
+            if (TextButton(actions[i].Label, actions[i].Primary))
+            {
+                clickedAction = i;
+            }
+
+            right -= spacing;
+        }
+
+        ImGui.SetCursorPos(new Vector2(AuxTheme.WindowPadding.X, height + 8f * Scale));
+        return new TitleBarResult(clickedAction, clickedButton);
     }
 
     public static int Tabs(string id, string[] labels, int selected)
@@ -71,12 +93,10 @@ public static class AuxWidgets
         var height = ImGui.GetFrameHeight();
         var x = start.X;
 
-        drawList.AddLine(new Vector2(start.X, start.Y + height - 0.5f), new Vector2(start.X + available, start.Y + height - 0.5f), ImGui.GetColorU32(AuxTheme.Rule));
-
         for (var i = 0; i < labels.Length; i++)
         {
             var textSize = ImGui.CalcTextSize(labels[i]);
-            var width = textSize.X + TabPadding * 2f * Scale;
+            var width = textSize.X + TabPaddingX * 2f * Scale;
             ImGui.SetCursorScreenPos(new Vector2(x, start.Y));
             if (ImGui.InvisibleButton($"##tab{i}", new Vector2(width, height)))
             {
@@ -84,15 +104,20 @@ public static class AuxWidgets
             }
 
             var hovered = ImGui.IsItemHovered();
-            var color = i == selected ? AuxTheme.ContentFg : hovered ? AuxTheme.NavFg : AuxTheme.MutedFg;
-            var textPosition = new Vector2(x + TabPadding * Scale, start.Y + MathF.Floor((height - textSize.Y) / 2f));
-            drawList.AddText(textPosition, ImGui.GetColorU32(color), labels[i]);
-
+            var min = new Vector2(x, start.Y);
+            var max = new Vector2(x + width, start.Y + height);
             if (i == selected)
             {
-                var thickness = AccentLineThickness * Scale;
-                drawList.AddRectFilled(new Vector2(x, start.Y + height - thickness), new Vector2(x + width, start.Y + height), ImGui.GetColorU32(AuxTheme.Accent));
+                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.Accent), height / 2f);
             }
+            else if (hovered)
+            {
+                drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.HoverTint), height / 2f);
+            }
+
+            var color = i == selected ? AuxTheme.OnAccent : AuxTheme.MutedFg;
+            var textPosition = new Vector2(x + TabPaddingX * Scale, start.Y + MathF.Floor((height - textSize.Y) / 2f));
+            drawList.AddText(textPosition, ImGui.GetColorU32(color), labels[i]);
 
             x += width + TabGap * Scale;
         }
@@ -105,14 +130,22 @@ public static class AuxWidgets
 
     public static void SectionLabel(string label, string? hint = null, float reserveRight = 0f)
     {
-        var rightEdge = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X - reserveRight;
+        var start = ImGui.GetCursorScreenPos();
+        var rightEdge = start.X + ImGui.GetContentRegionAvail().X - reserveRight;
+        var markerSpace = (MarkerWidth + 6f) * Scale;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + markerSpace);
         using (AuxFonts.PushSmallBold())
         {
-            ImGui.TextColored(AuxTheme.Accent, label.ToUpperInvariant());
+            ImGui.TextColored(AuxTheme.MutedFg, label.ToUpperInvariant());
         }
 
         var labelMin = ImGui.GetItemRectMin();
         var labelMax = ImGui.GetItemRectMax();
+        var centerY = MathF.Floor((labelMin.Y + labelMax.Y) / 2f);
+        var drawList = ImGui.GetWindowDrawList();
+        var markerHalf = MarkerHeight * Scale / 2f;
+        drawList.AddRectFilled(new Vector2(start.X, centerY - markerHalf), new Vector2(start.X + MarkerWidth * Scale, centerY + markerHalf), ImGui.GetColorU32(AuxTheme.Accent), MarkerWidth * Scale / 2f);
+
         var lineStart = labelMax.X;
         if (hint != null)
         {
@@ -122,10 +155,9 @@ public static class AuxWidgets
         }
 
         lineStart += 8f * Scale;
-        var y = MathF.Floor((labelMin.Y + labelMax.Y) / 2f) + 0.5f;
         if (rightEdge > lineStart)
         {
-            ImGui.GetWindowDrawList().AddLine(new Vector2(lineStart, y), new Vector2(rightEdge, y), ImGui.GetColorU32(AuxTheme.Rule));
+            drawList.AddLine(new Vector2(lineStart, centerY + 0.5f), new Vector2(rightEdge, centerY + 0.5f), ImGui.GetColorU32(AuxTheme.Rule));
         }
     }
 
@@ -133,11 +165,12 @@ public static class AuxWidgets
 
     public static bool TextButton(string label, bool primary = false)
     {
-        using var colors = ImRaii.PushColor(ImGuiCol.Text, primary ? AuxTheme.Accent : AuxTheme.NavFg)
-            .Push(ImGuiCol.Button, AuxTheme.Transparent)
-            .Push(ImGuiCol.ButtonHovered, AuxTheme.HoverTint)
-            .Push(ImGuiCol.ButtonActive, AuxTheme.ActiveTint);
-        using var padding = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(TextButtonPaddingX * Scale, AuxTheme.FramePadding.Y));
+        using var colors = ImRaii.PushColor(ImGuiCol.Text, primary ? AuxTheme.OnAccent : AuxTheme.NavFg)
+            .Push(ImGuiCol.Button, primary ? AuxTheme.Accent : AuxTheme.Transparent)
+            .Push(ImGuiCol.ButtonHovered, primary ? AuxTheme.AccentHover : AuxTheme.HoverTint)
+            .Push(ImGuiCol.ButtonActive, primary ? AuxTheme.AccentDeep : AuxTheme.ActiveTint);
+        using var styles = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(TextButtonPaddingX * Scale, AuxTheme.FramePadding.Y))
+            .Push(ImGuiStyleVar.FrameRounding, ImGui.GetFrameHeight() / 2f);
         return ImGui.Button(label);
     }
 
@@ -149,6 +182,7 @@ public static class AuxWidgets
         bool hovered;
 
         using (ImRaii.PushFont(UiBuilder.IconFont))
+        using (ImRaii.PushStyle(ImGuiStyleVar.FrameRounding, Math.Min(buttonSize.X, buttonSize.Y) / 2f))
         using (ImRaii.PushColor(ImGuiCol.Button, AuxTheme.Transparent)
             .Push(ImGuiCol.ButtonHovered, AuxTheme.HoverTint)
             .Push(ImGuiCol.ButtonActive, AuxTheme.ActiveTint))
@@ -172,10 +206,12 @@ public static class AuxWidgets
 
     public static bool Checkbox(string label, ref bool value)
     {
-        using var colors = ImRaii.PushColor(ImGuiCol.FrameBg, AuxTheme.CellBg)
-            .Push(ImGuiCol.FrameBgHovered, AuxTheme.HoverTint)
-            .Push(ImGuiCol.FrameBgActive, AuxTheme.ActiveTint)
-            .Push(ImGuiCol.CheckMark, AuxTheme.Accent);
+        var isChecked = value;
+        using var colors = ImRaii.PushColor(ImGuiCol.FrameBg, isChecked ? AuxTheme.Accent : AuxTheme.CellBg)
+            .Push(ImGuiCol.FrameBgHovered, isChecked ? AuxTheme.AccentHover : AuxTheme.HoverTint)
+            .Push(ImGuiCol.FrameBgActive, isChecked ? AuxTheme.AccentDeep : AuxTheme.ActiveTint)
+            .Push(ImGuiCol.CheckMark, AuxTheme.OnAccent);
+        using var rounding = ImRaii.PushStyle(ImGuiStyleVar.FrameRounding, AuxTheme.CheckboxRounding * Scale);
         return ImGui.Checkbox(label, ref value);
     }
 
@@ -203,41 +239,36 @@ public static class AuxWidgets
 
     public static bool InputText(string label, ref string value, int maxLength)
     {
-        using var frame = PushInputFrame();
         var changed = ImGui.InputText(label, ref value, maxLength);
-        DrawItemUnderline();
+        DrawItemFocusOutline();
         return changed;
     }
 
     public static bool InputTextWithHint(string label, string hint, ref string value, int maxLength)
     {
-        using var frame = PushInputFrame();
         var changed = ImGui.InputTextWithHint(label, hint, ref value, maxLength);
-        DrawItemUnderline();
+        DrawItemFocusOutline();
         return changed;
     }
 
     public static bool InputInt(string label, ref int value)
     {
-        using var frame = PushInputFrame();
         var changed = ImGui.InputInt(label, ref value);
-        DrawItemUnderline();
+        DrawItemFocusOutline();
         return changed;
     }
 
     public static bool DragInt(string label, ref int value, float speed, int min, int max)
     {
-        using var frame = PushInputFrame();
         var changed = ImGui.DragInt(label, ref value, speed, min, max);
-        DrawItemUnderline();
+        DrawItemFocusOutline();
         return changed;
     }
 
     public static bool DragFloat(string label, ref float value, float speed, float min, float max)
     {
-        using var frame = PushInputFrame();
         var changed = ImGui.DragFloat(label, ref value, speed, min, max);
-        DrawItemUnderline();
+        DrawItemFocusOutline();
         return changed;
     }
 
@@ -246,21 +277,39 @@ public static class AuxWidgets
         var drawList = ImGui.GetWindowDrawList();
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.CalcItemWidth(), ImGui.GetFrameHeight());
-        bool open;
-        using (PushInputFrame())
+        var open = ImGui.BeginCombo(label, preview, flags);
+        if (open || ImGui.IsItemActive())
         {
-            open = ImGui.BeginCombo(label, preview, flags);
+            DrawFocusOutline(drawList, min, max);
         }
 
-        DrawUnderline(drawList, min, max, open || ImGui.IsItemActive());
         return open;
     }
 
-    public static bool ComboItem(string label, bool selected)
+    public static bool RoundedSelectable(string label, bool selected, Vector2? size = null)
     {
-        using var color = ImRaii.PushColor(ImGuiCol.Text, AuxTheme.Accent, selected);
-        return ImGui.Selectable(label, selected);
+        var min = ImGui.GetCursorScreenPos();
+        var width = size?.X > 0f ? size.Value.X : ImGui.GetContentRegionAvail().X;
+        var height = size?.Y > 0f ? size.Value.Y : ImGui.GetTextLineHeight();
+        var max = min + new Vector2(width, height);
+        var hovered = ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(min, max);
+        var rounding = AuxTheme.FrameRounding * Scale;
+        if (selected)
+        {
+            ImGui.GetWindowDrawList().AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.AccentSelection), rounding);
+        }
+        else if (hovered)
+        {
+            ImGui.GetWindowDrawList().AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.HoverTint), rounding);
+        }
+
+        using var colors = ImRaii.PushColor(ImGuiCol.Header, AuxTheme.Transparent)
+            .Push(ImGuiCol.HeaderHovered, AuxTheme.Transparent)
+            .Push(ImGuiCol.HeaderActive, AuxTheme.Transparent);
+        return ImGui.Selectable(label, selected, ImGuiSelectableFlags.None, new Vector2(width, height));
     }
+
+    public static bool ComboItem(string label, bool selected) => RoundedSelectable(label, selected);
 
     public static bool BeginTable(string id, int columns, bool scrollingRows = false)
     {
@@ -342,46 +391,9 @@ public static class AuxWidgets
         var (fillMin, fillMax) = AuxGauge.FillRect(min, max, fraction);
         if (fillMax.X > fillMin.X)
         {
-            ImGui.GetWindowDrawList().AddRectFilled(fillMin, fillMax, ImGui.GetColorU32(color));
+            var radius = Math.Min((fillMax.Y - fillMin.Y) / 2f, (fillMax.X - fillMin.X) / 2f);
+            ImGui.GetWindowDrawList().AddRectFilled(fillMin, fillMax, ImGui.GetColorU32(color), radius);
         }
-    }
-
-    public static int FooterBar(params FooterAction[] actions)
-    {
-        var windowPosition = ImGui.GetWindowPos();
-        var windowSize = ImGui.GetWindowSize();
-        var height = FooterHeight;
-        var min = new Vector2(windowPosition.X, windowPosition.Y + windowSize.Y - height);
-        var max = windowPosition + windowSize;
-        var drawList = ImGui.GetWindowDrawList();
-
-        drawList.AddRectFilled(min, max, ImGui.GetColorU32(AuxTheme.NavBg));
-        drawList.AddLine(min, new Vector2(max.X, min.Y), ImGui.GetColorU32(AuxTheme.Rule));
-
-        var spacing = AuxTheme.ItemSpacing.X;
-        var totalWidth = 0f;
-        foreach (var action in actions)
-        {
-            totalWidth += TextButtonWidth(action.Label) + spacing;
-        }
-
-        totalWidth -= spacing;
-        var x = max.X - AuxTheme.WindowPadding.X - totalWidth;
-        var y = min.Y + MathF.Floor((height - ImGui.GetFrameHeight()) / 2f);
-        var clicked = -1;
-
-        for (var i = 0; i < actions.Length; i++)
-        {
-            ImGui.SetCursorScreenPos(new Vector2(x, y));
-            if (TextButton(actions[i].Label, actions[i].Primary))
-            {
-                clicked = i;
-            }
-
-            x += TextButtonWidth(actions[i].Label) + spacing;
-        }
-
-        return clicked;
     }
 
     public static void NavLabel(string text)
@@ -393,7 +405,7 @@ public static class AuxWidgets
             var padding = new Vector2(ChipPaddingX, ChipPaddingY) * Scale;
             var position = ImGui.GetCursorScreenPos();
             ImGui.Dummy(textSize + padding * 2f);
-            ImGui.GetWindowDrawList().AddText(position + padding, ImGui.GetColorU32(AuxTheme.NavFg), upper);
+            ImGui.GetWindowDrawList().AddText(position + padding, ImGui.GetColorU32(AuxTheme.MutedFg), upper);
         }
     }
 
@@ -405,17 +417,13 @@ public static class AuxWidgets
             var textSize = ImGui.CalcTextSize(text);
             var padding = new Vector2(ChipPaddingX, ChipPaddingY) * Scale;
             var position = ImGui.GetCursorScreenPos();
-            ImGui.Dummy(textSize + padding * 2f);
+            var size = textSize + padding * 2f;
+            ImGui.Dummy(size);
             var hovered = ImGui.IsItemHovered();
 
             var drawList = ImGui.GetWindowDrawList();
-            drawList.AddText(position + padding, ImGui.GetColorU32(enabled ? AuxTheme.Accent : AuxTheme.MutedFg), text);
-            if (enabled)
-            {
-                var bottom = position.Y + textSize.Y + padding.Y * 2f;
-                var thickness = AccentLineThickness * Scale;
-                drawList.AddRectFilled(new Vector2(position.X, bottom - thickness), new Vector2(position.X + textSize.X + padding.X * 2f, bottom), ImGui.GetColorU32(AuxTheme.Accent));
-            }
+            drawList.AddRectFilled(position, position + size, ImGui.GetColorU32(enabled ? AuxTheme.Accent : AuxTheme.CellBg), size.Y / 2f);
+            drawList.AddText(position + padding, ImGui.GetColorU32(enabled ? AuxTheme.OnAccent : AuxTheme.MutedFg), text);
 
             if (enabled && hovered && tooltip != null)
             {
@@ -424,17 +432,16 @@ public static class AuxWidgets
         }
     }
 
-    private static ImRaii.ColorDisposable PushInputFrame() => ImRaii.PushColor(ImGuiCol.FrameBg, AuxTheme.Transparent)
-        .Push(ImGuiCol.FrameBgActive, AuxTheme.Transparent);
-
-    private static void DrawItemUnderline()
+    private static void DrawItemFocusOutline()
     {
-        DrawUnderline(ImGui.GetWindowDrawList(), ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), ImGui.IsItemActive() || ImGui.IsItemFocused());
+        if (ImGui.IsItemActive() || ImGui.IsItemFocused())
+        {
+            DrawFocusOutline(ImGui.GetWindowDrawList(), ImGui.GetItemRectMin(), ImGui.GetItemRectMax());
+        }
     }
 
-    private static void DrawUnderline(ImDrawListPtr drawList, Vector2 min, Vector2 max, bool lit)
+    private static void DrawFocusOutline(ImDrawListPtr drawList, Vector2 min, Vector2 max)
     {
-        var y = max.Y - 0.5f;
-        drawList.AddLine(new Vector2(min.X, y), new Vector2(max.X, y), ImGui.GetColorU32(lit ? AuxTheme.Accent : AuxTheme.AccentDim), AuxTheme.UnderlineThickness);
+        drawList.AddRect(min, max, ImGui.GetColorU32(AuxTheme.AccentHover), AuxTheme.FrameRounding * Scale, ImDrawFlags.None, 1f);
     }
 }
