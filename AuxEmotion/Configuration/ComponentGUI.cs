@@ -197,8 +197,8 @@ namespace AuxEmotion
                                 ImGui.CloseCurrentPopup();
                             }
                         }
-                        ImGui.EndChild();
                     }
+                    ImGui.EndChild();
                     ImGui.EndCombo();
                 }
             }
@@ -328,6 +328,7 @@ namespace AuxEmotion
                     ImGui.TableNextColumn();
                     DrawDragInt("##newPriority", ref newTriggerData.priority, 10, ImGui.GetContentRegionAvail().X);
 
+                    ImGui.PopID();
                     ImGui.EndTable();
 
                     if (AuxWidgets.BeginTable("RowsTriggerTable", 7, true))
@@ -440,6 +441,8 @@ namespace AuxEmotion
                                     DrawDragInt("##Priority", ref triggerData.priority, 10, ImGui.GetContentRegionAvail().X);
 
                                     if (triggerData.isLocked) ImGui.EndDisabled();
+
+                                    ImGui.PopID();
                                 }
                             }
                             else
@@ -477,7 +480,6 @@ namespace AuxEmotion
                             deleteTrigger = string.Empty;
                         }
 
-                        ImGui.PopID();
                         ImGui.EndTable();
 
                         if (beginDrag >= 0)
@@ -622,6 +624,7 @@ namespace AuxEmotion
                 var rowStart = ImGui.GetCursorScreenPos();
                 using (ImRaii.PushColor(ImGuiCol.Text, player.Value.isEnabled ? AuxTheme.ContentFg : AuxTheme.MutedFg))
                 {
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + SelectionGutter());
                     AuxWidgets.Checkbox($"##{player.Key}Enabled", ref player.Value.isEnabled);
                     ImGui.SameLine();
                     if (ImGui.Selectable($"{player.Key}##w{player.Key}", selectedCharacter == player.Value))
@@ -683,13 +686,15 @@ namespace AuxEmotion
                 {
                     if (!player.Key.Contains(searchCharacterB, StringComparison.CurrentCultureIgnoreCase)) continue;
                 }
+                var rowStart = ImGui.GetCursorScreenPos();
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + SelectionGutter());
                 if (ImGui.Selectable($"{player.Key}##b{player.Key}", selectedCharacterB == player.Value))
                 {
                     selectedCharacterB = player.Value;
                 }
                 if (selectedCharacterB == player.Value)
                 {
-                    DrawSelectionBar(ImGui.GetItemRectMin().X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
+                    DrawSelectionBar(rowStart.X, ImGui.GetItemRectMin().Y, ImGui.GetItemRectMax().Y);
                 }
             }
             ImGui.EndChild();
@@ -714,6 +719,8 @@ namespace AuxEmotion
             }
         }
 
+        private static float SelectionGutter() => 6f * ImGuiHelpers.GlobalScale;
+
         private static void DrawSelectionBar(float x, float top, float bottom)
         {
             ImGui.GetWindowDrawList().AddRectFilled(new Num.Vector2(x, top), new Num.Vector2(x + 2f * ImGuiHelpers.GlobalScale, bottom), ImGui.GetColorU32(AuxTheme.Accent));
@@ -721,9 +728,8 @@ namespace AuxEmotion
 
         public void DrawReactionList()
         {
-            if (ImGui.BeginChild("ReactionChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), false))
+            if (ImGui.BeginChild("ReactionChildFrame", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), false) && selectedCharacter != null)
             {
-                if (selectedCharacter == null) return;
                 var text = copyCharacterReaction.name == string.Empty ? "Copy" : $"Copied {copyCharacterReaction.name} reactions";
                 if (AuxWidgets.TextButton($"{text}##Copy"))
                 {
@@ -910,6 +916,7 @@ namespace AuxEmotion
                         DrawDragInt("##rowReceivedPriority", ref reactionData.priority, 10, ImGui.GetContentRegionAvail().X);
 
                         if (reactionData.isLocked) ImGui.EndDisabled();
+                        ImGui.PopID();
                         i++;
                     }
                     if (deleteIndex > -1)
@@ -917,7 +924,6 @@ namespace AuxEmotion
                         selectedCharacter.reactionList.RemoveAt(deleteIndex);
                     }
 
-                    ImGui.PopID();
                     ImGui.EndTable();
                     if (beginDrag >= 0)
                     {

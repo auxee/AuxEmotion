@@ -25,14 +25,16 @@ namespace AuxEmotion
 
 #if DEBUG
             const string windowTitle = "[DEBUG] AuxEmotion";
+            const string windowName = "[DEBUG] AuxEmotion Configuration Window##AuxEmotionConfigWin";
 #else
             const string windowTitle = "AuxEmotion";
+            const string windowName = "AuxEmotion Configuration Window##AuxEmotionConfigWin";
 #endif
             using (AuxTheme.Push())
             {
                 ImGui.SetNextWindowSize(new Num.Vector2(980f, 560f) * ImGuiHelpers.GlobalScale, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowSizeConstraints(new Num.Vector2(520f, 320f) * ImGuiHelpers.GlobalScale, new Num.Vector2(float.MaxValue, float.MaxValue));
-                ImGui.Begin($"{windowTitle}##AuxEmotionConfigWin", ref isOpenConfig, ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+                ImGui.Begin(windowName, ref isOpenConfig, ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
                 if (AuxWidgets.TitleBar(windowTitle, AuxWidgets.CloseButton) == 0)
                 {
@@ -191,11 +193,11 @@ namespace AuxEmotion
             ImGui.BeginChild("##BWLists", new Num.Vector2(200 * ImGuiHelpers.GlobalScale, ImGui.GetContentRegionAvail().Y));
             using (ImRaii.PushColor(ImGuiCol.ChildBg, AuxTheme.RowAlt))
             {
-                ImGui.BeginChild("##BoxWhitelist", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y / 2), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+                ImGui.BeginChild("##BoxWhitelist", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y / 2), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
                 DrawWhiteList();
                 ImGui.EndChild();
 
-                ImGui.BeginChild("##BoxBlacklist", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+                ImGui.BeginChild("##BoxBlacklist", new Num.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
                 DrawBlackList();
                 ImGui.EndChild();
             }

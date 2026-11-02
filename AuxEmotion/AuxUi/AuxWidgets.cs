@@ -388,7 +388,12 @@ public static class AuxWidgets
     {
         using (AuxFonts.PushSmallBold())
         {
-            ImGui.TextColored(AuxTheme.NavFg, text.ToUpperInvariant());
+            var upper = text.ToUpperInvariant();
+            var textSize = ImGui.CalcTextSize(upper);
+            var padding = new Vector2(ChipPaddingX, ChipPaddingY) * Scale;
+            var position = ImGui.GetCursorScreenPos();
+            ImGui.Dummy(textSize + padding * 2f);
+            ImGui.GetWindowDrawList().AddText(position + padding, ImGui.GetColorU32(AuxTheme.NavFg), upper);
         }
     }
 
