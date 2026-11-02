@@ -29,21 +29,12 @@ jobs:
         run: |
           $ver = '${{ github.ref_name }}'
           invoke-expression 'dotnet build --no-restore --configuration Release --nologo -p:Version=$ver -p:FileVersion=$ver -p:AssemblyVersion=$ver'
-      - name: Write version into jsons
-        run: |
-          $ver = '${{ github.ref_name }}'
-          $path = './AuxEmotion/bin/x64/Release/AuxEmotion.json'
-          $json = Get-Content -Raw $path | ConvertFrom-Json
-          $json.AssemblyVersion = $ver
-          $content = $json | ConvertTo-Json
-          set-content -Path $path -Value $content
-      - name: Archive
-        run: Compress-Archive -Path AuxEmotion/bin/x64/Release/* -DestinationPath AuxEmotion.zip
+      - name: Stage release package
+        run: Copy-Item AuxEmotion/bin/x64/Release/AuxEmotion/latest.zip AuxEmotion.zip
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            ./AuxEmotion/bin/x64/Release/*
+          path: AuxEmotion.zip
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
