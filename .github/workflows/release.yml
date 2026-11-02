@@ -4,7 +4,10 @@ on:
   push:
     tags-ignore:
       - test_*
-      
+
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -40,24 +43,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            ./AuxEmotion/bin/Release/*
+            ./AuxEmotion/bin/x64/Release/*
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: AuxEmotion ${{ github.ref }}
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./AuxEmotion.zip
-          asset_name: AuxEmotion.zip
-          asset_content_type: application/zip
+          name: AuxEmotion ${{ github.ref_name }}
+          files: AuxEmotion.zip
