@@ -19,6 +19,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="AuxUi\Fonts\*" Link="Fonts\%(Filename)%(Extension)">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
     </ItemGroup>
 </Project>
