@@ -4,7 +4,7 @@ using ECommons.DalamudServices;
 using AuxEmotion.Configuration.Data;
 using System;
 using System.Linq;
-using AuxEmotion.Utility;
+using AuxEmotion.Services;
 using Lumina.Excel.Sheets;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using System.Collections.Generic;

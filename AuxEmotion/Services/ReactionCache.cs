@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System;
 using System.Linq;
 
-namespace AuxEmotion.ChatMessages
+namespace AuxEmotion.Services
 {
     public class ReactionCache
     {

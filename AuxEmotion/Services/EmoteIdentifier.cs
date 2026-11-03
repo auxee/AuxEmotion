@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
-namespace AuxEmotion.Utility;
+namespace AuxEmotion.Services;
 
 public unsafe record EmoteIdentifier([property: JsonProperty("e")] uint EmoteID)
 {

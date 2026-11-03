@@ -1,5 +1,5 @@
 using AuxEmotion.Configuration.Data;
-using AuxEmotion.Utility;
+using AuxEmotion.Services;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text;
 using Dalamud.Interface;

@@ -8,11 +8,9 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.Automation;
 using Dalamud.Game.Gui.Toast;
-using AuxEmotion.Hooks;
+using AuxEmotion.Services;
 using AuxEmotion.Configuration.Data;
-using AuxEmotion.Utility;
 using Dalamud.Game.ClientState.Conditions;
-using AuxEmotion.ChatMessages;
 using System.Linq;
 using AuxUi;
 

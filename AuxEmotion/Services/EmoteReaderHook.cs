@@ -4,7 +4,7 @@ using ECommons.DalamudServices;
 using System;
 using System.Linq;
 
-namespace AuxEmotion.Hooks
+namespace AuxEmotion.Services
 {
     public class EmoteReaderHooks : IDisposable
     {

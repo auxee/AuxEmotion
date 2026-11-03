@@ -2,7 +2,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Plugin;
 using Dalamud.Bindings.ImGui;
 using Num = System.Numerics;
-using AuxEmotion.Utility;
+using AuxEmotion.Services;
 using System;
 using ECommons.DalamudServices;
 using AuxUi;

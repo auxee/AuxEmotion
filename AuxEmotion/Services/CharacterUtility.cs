@@ -5,7 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 
-namespace AuxEmotion.Utility
+namespace AuxEmotion.Services
 {
     public class CharacterUtility
     {
